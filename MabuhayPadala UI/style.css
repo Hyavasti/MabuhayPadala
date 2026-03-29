@@ -22,9 +22,9 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 8%;
+    padding: 15px 8%;
     background: var(--white);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .logo-container {
@@ -76,7 +76,7 @@ nav {
     color: #1e293b; 
     font-weight: 600;
     font-size: 0.95rem;
-    transition: color 0.3s;
+    transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
@@ -87,7 +87,7 @@ nav {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 30px; 
+    gap: 20px; 
 }
 
 
@@ -95,16 +95,86 @@ nav {
     background: #2563eb;
     color: white;
     border: none;
-    padding: 8px 18px; 
+    padding: 8px 20px; 
     border-radius: 6px;
-    font-weight: 600;
     font-size: 0.9rem; 
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.3s ease, transform 0.2s;
 }
 
 .login-nav-btn:hover {
     background: #1e4ed8;
+    transform: translateY(-1px);
+}
+
+/* Dropdown Container */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 0;
+}
+
+.arrow {
+    font-size: 0.6rem;
+    transition: transform 0.3s;
+}
+
+/* The actual hidden menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 240px; 
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+    z-index: 100;
+    border-radius: 8px;
+    top: 100%;
+    left: 0;
+    overflow: hidden;
+    border: 1px solid #edf2f7;
+}
+
+/* Links dropdown */
+.dropdown-content a {
+    color: #475569;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8fafc;
+    color: #2563eb;
+}
+
+.dropdown:hover .arrow {
+    transform: rotate(180deg);
+    color: #2563eb;
+}
+
+.dropdown:hover .dropbtn {
+    color: #2563eb;
 }
 
 /* Hero Section */
