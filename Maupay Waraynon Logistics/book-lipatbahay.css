@@ -1,6 +1,4 @@
-/* ==========================================
-   ADDRESS INTERFACE CONTAINER STACKS
-   ========================================== */
+/* ADDRESS INTERFACE CONTAINER STACKS */
 .address-forms-stack {
     display: flex;
     flex-direction: column;
@@ -20,7 +18,6 @@
     gap: 16px;
 }
 
-/* Custom reset rules for fieldset elements */
 fieldset.address-block-card {
     margin: 0;
     min-width: 0;
@@ -38,12 +35,10 @@ fieldset.address-block-card {
 .card-legend-title {
     font-size: 1rem;
     font-weight: 700;
-    color: #0d47a1; /* Primary brand text alignment color theme */
+    color: #0d47a1; 
 }
 
-/* ==========================================
-   SHORTCUT PICKER DROPDOWNS CUSTOM LOOK
-   ========================================== */
+/* SHORTCUT PICKER DROPDOWNS */
 .select-shortcut-wrapper {
     position: relative;
     display: inline-block;
@@ -73,12 +68,10 @@ fieldset.address-block-card {
     transform: translateY(-50%);
     font-size: 0.72rem;
     color: #64748b;
-    pointer-events: none; /* Allows clicks to pass into select below */
+    pointer-events: none;
 }
 
-/* ==========================================
-   FORM GRID FIELDS PACKAGING
-   ========================================== */
+/* FORM GRID FIELDS PACKAGING */
 .form-fields-row-grid {
     display: flex;
     gap: 20px;
@@ -119,6 +112,7 @@ fieldset.address-block-card {
 .inline-input-select {
     width: 100%;
 }
+
 .inline-input-select select {
     appearance: none;
     -webkit-appearance: none;
@@ -143,9 +137,71 @@ fieldset.address-block-card {
     resize: none;
 }
 
-/* ==========================================
-   FOOTER BUTTON CONTROL ELEMENTS
-   ========================================== */
+/* CUSTOM TICK BOX CHECKBOX */
+.checkbox-action-row {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.custom-tick-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #475569;
+    user-select: none;
+    gap: 10px;
+}
+
+.custom-tick-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark-box {
+    height: 18px;
+    width: 18px;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.custom-tick-container input:checked ~ .checkmark-box {
+    background-color: #0d47a1;
+    border-color: #0d47a1;
+}
+
+.checkmark-box:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.custom-tick-container input:checked ~ .checkmark-box:after {
+    display: block;
+}
+
+.custom-tick-container:hover input ~ .checkmark-box {
+    border-color: #0d47a1;
+}
+
+/* FOOTER BUTTON CONTROL */
 .form-wizard-navigation-buttons {
     display: flex;
     justify-content: center;
@@ -155,8 +211,8 @@ fieldset.address-block-card {
 }
 
 .btn-wizard-back {
-    background-color: #e2e8f0;
-    color: #334155;
+    background-color: #e2e8f0; 
+    color: #334155; 
     border: none;
     padding: 12px 45px;
     border-radius: 8px;
@@ -165,11 +221,12 @@ fieldset.address-block-card {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .btn-wizard-back:hover { background-color: #cbd5e1; }
 
 .btn-wizard-next {
-    background-color: #ef5350; /* Action Coral Red */
-    color: #ffffff;
+    background-color: #ef5350; 
+    color: #ffffff; 
     border: none;
     padding: 12px 55px;
     border-radius: 8px;
@@ -179,6 +236,7 @@ fieldset.address-block-card {
     box-shadow: 0 4px 12px rgba(239, 83, 80, 0.15);
     transition: background-color 0.2s;
 }
+
 .btn-wizard-next:hover { background-color: #e53935; }
 
 @media (max-width: 768px) {

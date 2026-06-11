@@ -1,6 +1,4 @@
-/* ==========================================
-   GLOBAL STYLE SETTINGS & RESET
-   ========================================== */
+/* GLOBAL STYLE SETTINGS */
 * {
     margin: 0;
     padding: 0;
@@ -14,19 +12,17 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Prevent body scroll entirely on desktop */
+    overflow: hidden;
 }
 
-/* ==========================================
-   HEADER NAVIGATION BAR
-   ========================================== */
+/* HEADER NAVIGATION BAR */
 header {
     background-color: #0d47a1;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 5%;
-    height: 60px; /* Precise layout control tracking */
+    height: 60px;
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
@@ -76,16 +72,14 @@ nav a {
 
 .nav-toggle, .nav-toggle-label { display: none; }
 
-/* ==========================================
-   PORTAL COMPONENT SYSTEM CONTAINER
-   ========================================== */
+/* PORTAL COMPONENT SYSTEM CONTAINER */
 .portal-container {
     flex: 1;
     height: calc(100vh - 60px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 5%; /* Tight dynamic outer canvas tracking padding */
+    padding: 10px 5%;
 }
 
 .portal-wrapper {
@@ -97,14 +91,12 @@ nav a {
     gap: 40px;
 }
 
-/* ==========================================
-   THE SINGLE COLUMN REGISTRATION CARD
-   ========================================== */
+/* REGISTRATION CARD */
 .login-card {
     background-color: #ffffff;
     width: 100%;
-    max-width: 480px; /* Keeps your exact width structure */
-    padding: 20px 30px; /* Reduced padding slightly to prevent bottom text clip */
+    max-width: 480px; 
+    padding: 20px 30px; 
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(13, 71, 161, 0.05);
     display: flex;
@@ -143,9 +135,8 @@ nav a {
     flex: 1;
 }
 
-/* Input Fields Spacing Optimizations */
 .input-group {
-    margin-bottom: 8px; /* Tighter margins to keep content on screen */
+    margin-bottom: 8px;
     text-align: left;
 }
 
@@ -159,7 +150,7 @@ nav a {
 
 .input-group input {
     width: 100%;
-    padding: 9px 12px; /* Balanced height inputs to prevent desktop overflows */
+    padding: 9px 12px; 
     border: 1px solid #cccccc;
     border-radius: 6px;
     font-size: 0.85rem;
@@ -173,7 +164,7 @@ nav a {
     background-color: #ffffff;
 }
 
-/* International Dropdown Layout Row Configuration */
+/* International Dropdown */
 .phone-input-container {
     display: flex;
     gap: 8px;
@@ -190,7 +181,7 @@ nav a {
     max-width: 120px;
 }
 
-/* Terms and Conditions Box Container Placement */
+/* Terms and Conditions */
 .tos-box {
     background-color: #f4f8fc;
     border: 1px solid #d1e3f8;
@@ -212,7 +203,7 @@ nav a {
     font-weight: 600;
 }
 
-/* Interactive Submission Action Form Control Buttons */
+/* Action Form Control Buttons */
 .btn-submit-login {
     width: 100%;
     background-color: #ef5350;
@@ -243,7 +234,7 @@ nav a {
     font-weight: 700;
 }
 
-/* Real-time Validation Label Targets */
+/* Real-time Validation */
 .error-msg {
     color: #ef5350;
     font-size: 0.7rem;
@@ -252,18 +243,16 @@ nav a {
     min-height: 11px;
 }
 
-/* Password Wrapper to position eye icon */
+/* Password Wrapper */
 .password-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* Ensure text doesn't run into the eye icon */
 .password-wrapper input {
     padding-right: 40px !important; 
 }
 
-/* Eye Icon Styling */
 .toggle-password-icon {
     position: absolute;
     right: 12px;
@@ -273,23 +262,20 @@ nav a {
     color: #777777;
     font-size: 0.95rem;
     transition: color 0.2s, opacity 0.2s;
-    opacity: 0; /* Hidden by default until input is detected */
-    pointer-events: none; /* Prevents clicking when invisible */
+    opacity: 0; 
+    pointer-events: none;
 }
 
-/* Class to reveal the eye icon dynamically via JS */
 .toggle-password-icon.visible {
     opacity: 1;
-    pointer-events: auto; /* Re-enable clicks */
+    pointer-events: auto; 
 }
 
 .toggle-password-icon:hover {
-    color: #0d47a1; /* Changes color to match brand blue on hover */
+    color: #0d47a1;
 }
 
-/* ==========================================
-   RIGHT COMPONENT HERO ILLUSTRATION GRAPHIC
-   ========================================== */
+/* ILLUSTRATION GRAPHIC */
 .portal-graphic {
     flex: 1;
     display: flex;
@@ -305,18 +291,15 @@ nav a {
     object-fit: contain;
 }
 
-/* ==========================================
-   SUCCESS MODAL POP-UP STYLES
-   ========================================== */
+/* SUCCESS MODAL POP-UP STYLES */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(13, 71, 161, 0.4); /* Dark translucent brand matching tint */
-    backdrop-filter: blur(5px); /* Blurs out the registration form behind cleanly */
-    display: flex;
+    background-color: rgba(13, 71, 161, 0.4); 
+    backdrop-filter: blur(5px);
     justify-content: center;
     align-items: center;
     z-index: 2000;
@@ -374,7 +357,7 @@ nav a {
 
 .target-email-highlight {
     font-weight: 700;
-    color: #ef5350 !important; /* Highlights their email in your primary red brand accent */
+    color: #ef5350 !important;
     margin: 6px 0 14px 0;
     font-size: 0.95rem !important;
     word-break: break-all;
@@ -403,9 +386,7 @@ nav a {
     background-color: #0a357a;
 }
 
-/* ==========================================
-   RESPONSIVE RETROFITS FOR MOBILE VIEWS
-   ========================================== */
+/* MEDIA RESPONSIVE */
 @media (max-width: 992px) {
     body { overflow-y: auto; height: auto; }
     .portal-container { height: auto; padding: 30px 5%; }

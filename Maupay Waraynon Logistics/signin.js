@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loginForm.addEventListener("submit", (e) => {
-        e.preventDefault(); // Prevents page reload
+        e.preventDefault();
         clearErrors();
 
         const email = document.getElementById("email").value.trim().toLowerCase();
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const savedAccountRaw = localStorage.getItem('dummyTestingAccount');
                 
                 let validEmail = "test@gmail.com";
-                let validPassword = "Password123!"; // Fallback credentials default configuration parameters
+                let validPassword = "Password123!";
 
                 if (savedAccountRaw) {
                     const savedAccount = JSON.parse(savedAccountRaw);
@@ -72,9 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // SUCCESS STATE: Redirecting route configuration execution sequence
+                // SUCCESS STATE
                 alert(`Welcome back! Routing straight to dashboard overview panel window context.`);
-                window.location.href = "dashboard.html"; // Routes directly into overview center frame tracking interface
+                window.location.href = "dashboard.html";
 
             } catch (err) {
                 alert("An internal testing crash occurred: " + err.message);

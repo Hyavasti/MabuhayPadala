@@ -5,10 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById("logoutBtn");
     const quickTrackForm = document.getElementById("quickTrackForm");
 
-    // ==========================================
     // AUTHENTICATION CHECK & PROFILE LOADING
-    // ==========================================
-    
+
     // Look into browser local storage for our active custom dummy session account
     const savedAccountRaw = localStorage.getItem('dummyTestingAccount');
 
@@ -31,9 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
         profileAvatar.innerText = "M";
     }
 
-    // ==========================================
+
     // EVENT ACTIONS HANDLERS
-    // ==========================================
 
     // Simple Alert for the layout search action
     quickTrackForm.addEventListener("submit", (e) => {

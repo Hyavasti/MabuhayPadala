@@ -101,9 +101,6 @@
                                 <div class="select-shortcut-wrapper inline-input-select">
                                     <select id="pickupProvince" required>
                                         <option value="" disabled selected>Select province</option>
-                                        <option value="Cavite">Cavite</option>
-                                        <option value="Metro Manila">Metro Manila</option>
-                                        <option value="Laguna">Laguna</option>
                                     </select>
                                     <i class="fas fa-chevron-down shortcut-icon"></i>
                                 </div>
@@ -133,6 +130,14 @@
                                 <label for="pickupStreetAddress">Street Address</label>
                                 <textarea id="pickupStreetAddress" placeholder="Street, Barangay, City, Province" rows="2" required></textarea>
                             </div>
+                        </div>
+
+                        <div class="checkbox-action-row">
+                            <label class="custom-tick-container">
+                                <input type="checkbox" id="chkSavePickupAddress">
+                                <span class="checkmark-box"></span>
+                                Save address
+                            </label>
                         </div>
                     </fieldset>
 
@@ -165,9 +170,6 @@
                                 <div class="select-shortcut-wrapper inline-input-select">
                                     <select id="dropoffProvince" required>
                                         <option value="" disabled selected>Select province</option>
-                                        <option value="Cavite">Cavite</option>
-                                        <option value="Metro Manila">Metro Manila</option>
-                                        <option value="Laguna">Laguna</option>
                                     </select>
                                     <i class="fas fa-chevron-down shortcut-icon"></i>
                                 </div>
@@ -198,6 +200,14 @@
                                 <textarea id="dropoffStreetAddress" placeholder="Street, Barangay, City, Province" rows="2" required></textarea>
                             </div>
                         </div>
+
+                        <div class="checkbox-action-row">
+                            <label class="custom-tick-container">
+                                <input type="checkbox" id="chkSaveDropoffAddress">
+                                <span class="checkmark-box"></span>
+                                Save address
+                            </label>
+                        </div>
                     </fieldset>
 
                 </div>
@@ -211,7 +221,6 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ph-locations@1.0.4/build/ph-locations.production.min.js" crossorigin="anonymous"></script>
     <script src="book-lipatbahay.js"></script>
 </body>
 </html>

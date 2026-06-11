@@ -21,9 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordEye = document.getElementById("togglePassword");
     const confirmEye = document.getElementById("toggleConfirmPassword");
 
-    // ==========================================
+    
     // DYNAMIC GLOBAL COUNTRY DICTIONARY FETCH
-    // ==========================================
     async function loadAllCountryCodes() {
         try {
             const response = await fetch("https://restcountries.com/v3.1/all?fields=name,idd,flag,cca2");
@@ -67,9 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadAllCountryCodes();
 
-    // ==========================================
     // PASSWORD EYE TOGGLE VISIBILITY TRACKING
-    // ==========================================
     function setupPasswordToggle(inputField, eyeIcon) {
         inputField.addEventListener("input", () => {
             if (inputField.value.length > 0) {
@@ -95,9 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPasswordToggle(passwordInput, passwordEye);
     setupPasswordToggle(confirmInput, confirmEye);
 
-    // ==========================================
+  
     // FIELD ERROR CLEARING UTILITIES
-    // ==========================================
     function clearErrors() {
         firstnameError.innerText = "";
         lastnameError.innerText = "";
@@ -115,9 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById(inputId).style.borderColor = "#ef5350";
     }
 
-    // ==========================================
+
     // MAIN VALIDATION & INTERCEPT SUBMIT EVENT
-    // ==========================================
     signupForm.addEventListener("submit", (e) => {
         e.preventDefault();
         clearErrors();
@@ -197,11 +192,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // =============================================================
-        // 🛠️ DUMMY SIMULATOR ACCOUNT VALIDATION (FOR TESTING CHANNELS)
-        // =============================================================
+      
+        // TESTING CHANNELS
+       
         
-        // Setup a mockup database arrays of emails already taken to test validation rejections
+        // emails to test validation rejections
         const mockDatabaseEmails = ["taken@gmail.com", "admin@maupay.com", "test@gmail.com"];
 
         // Trigger dynamic loading button state delay
@@ -229,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 lastName: lastName,
                 emailAddress: email.toLowerCase(),
                 fullContactPhone: countryCode + phone,
-                password: password, // Storing temporarily in plain text just for your local dummy testing
+                password: password,
                 accountCreatedTimestamp: new Date().toISOString()
             };
 
@@ -252,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             registerButton.innerText = originalBtnText;
             registerButton.disabled = false;
 
-        }, 800); // 800ms natural database delay simulator tracking
+        }, 800);
     });
 
     // Close Modal and bounce back out to sign-in panel route

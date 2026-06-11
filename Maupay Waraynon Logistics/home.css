@@ -1,6 +1,4 @@
-/* ==========================================
-   GLOBAL STYLE SETTINGS & RESET
-   ========================================== */
+/* GLOBAL STYLE SETTINGS */
 * {
     margin: 0;
     padding: 0;
@@ -36,9 +34,7 @@ img {
     text-align: center;
 }
 
-/* ==========================================
-   HEADER NAVIGATION BAR
-   ========================================== */
+/* HEADER NAVIGATION BAR */
 header {
     background-color: #0d47a1;
     display: flex;
@@ -124,7 +120,7 @@ nav a:hover {
     transform: translateY(-1px);
 }
 
-/* Hidden elements for responsive CSS toggle functionality */
+/* toggle functionality */
 .nav-toggle {
     display: none;
 }
@@ -133,9 +129,7 @@ nav a:hover {
     display: none;
 }
 
-/* ==========================================
-   HERO WITH DARK OVERLAY GRADIENT TINT
-   ========================================== */
+/* HERO WITH DARK OVERLAY GRADIENT TINT */
 .hero {
     position: relative;
     background: linear-gradient(rgba(13, 71, 161, 0.75), rgba(11, 57, 128, 0.85)), 
@@ -219,9 +213,7 @@ nav a:hover {
     transform: scale(1.02);
 }
 
-/* ==========================================
-   TOP FLOATING FEATURE CARDS
-   ========================================== */
+/* TOP FLOATING FEATURE CARDS */
 .top-features {
     display: flex;
     justify-content: center;
@@ -268,9 +260,7 @@ nav a:hover {
     line-height: 1.5;
 }
 
-/* ==========================================
-   WHY CHOOSE US
-   ========================================== */
+/* WHY CHOOSE US */
 .why-choose-us {
     display: flex;
     align-items: center;
@@ -307,9 +297,7 @@ nav a:hover {
     border-radius: 8px;
 }
 
-/* ==========================================
-   STATS RIBBON OVERVIEW
-   ========================================== */
+/* STATS OVERVIEW */
 .stats-ribbon {
     background-color: #d1e3f8;
     display: flex;
@@ -342,9 +330,7 @@ nav a:hover {
     opacity: 0.2;
 }
 
-/* ==========================================
-   LOGISTIC SERVICES CARDS
-   ========================================== */
+/* SERVICES CARDS */
 .logistic-services {
     padding: 60px 5%;
     background-color: #f7f9fc;
@@ -427,9 +413,7 @@ nav a:hover {
     transform: translateY(-1px);
 }
 
-/* ==========================================
-   PROCESS TIMELINE
-   ========================================== */
+/* PROCESS TIMELINE */
 .process-section {
     padding: 80px 8%;
     background-color: #e3f2fd;
@@ -505,9 +489,7 @@ nav a:hover {
     object-fit: cover;
 }
 
-/* ==========================================
-   TESTIMONIAL REVIEWS
-   ========================================== */
+/* REVIEWS */
 .reviews-section {
     padding: 80px 5%;
     background-color: #ffffff;
@@ -576,9 +558,7 @@ nav a:hover {
     color: #757575;
 }
 
-/* ==========================================
-   CTA PRE-FOOTER PROMOTION
-   ========================================== */
+/* CTA PRE-FOOTER PROMOTION */
 .cta-banner {
     background-color: #0d47a1;
     color: #ffffff;
@@ -636,9 +616,7 @@ nav a:hover {
     transform: translateY(-2px);
 }
 
-/* ==========================================
-   FOOTER AREA
-   ========================================== */
+/* FOOTER AREA */
 footer {
     background-color: #0b1c3a;
     color: #ffffff;
@@ -716,7 +694,7 @@ footer {
 
 .footer-links a:hover {
     color: #ffffff;
-    padding-left: 4px; /* Subtle slide-right indicator effect on hover */
+    padding-left: 4px;
 }
 
 .footer-bottom {
@@ -727,11 +705,8 @@ footer {
     color: #757575;
 }
 
-/* ==========================================
-   ROBUST RESPONSIVE MEDIA BREAKPOINTS
-   ========================================== */
+/* RESPONSIVE MEDIA */
 
-/* Tablet & Smaller Layouts Display adjustments */
 @media (max-width: 992px) {
     .top-features {
         flex-direction: column;
@@ -759,11 +734,8 @@ footer {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
-}
 
-/* Mobile Header Transformation & Component Stacking */
-@media (max-width: 768px) {
-    /* Responsive Pure-CSS Hamburger Menu drawer layout transformation */
+
     .nav-toggle-label {
         display: block;
         cursor: pointer;
@@ -810,7 +782,6 @@ footer {
         font-size: 1rem;
     }
 
-    /* Shows navigation dropdown drawer area on mobile when menu toggle checked */
     .nav-toggle:checked ~ nav {
         transform: scaleY(1);
     }
@@ -819,7 +790,6 @@ footer {
     .nav-toggle:checked ~ .nav-toggle-label span::before { transform: rotate(45deg); top: 0; }
     .nav-toggle:checked ~ .nav-toggle-label span::after { transform: rotate(-45deg); bottom: 0; }
 
-    /* Hero Text & Layout responsiveness resizing rules */
     .hero {
         height: auto;
         padding: 60px 20px 80px 20px;
@@ -833,7 +803,6 @@ footer {
         font-size: 0.85rem;
     }
 
-    /* Stacks inner tracking field layout on compact touch monitors */
     .tracking-box {
         flex-direction: column;
         background: transparent;

@@ -1,6 +1,4 @@
-/* ==========================================
-   GLOBAL STYLE SETTINGS & RESET
-   ========================================== */
+/* GLOBAL STYLE SETTINGS */
 * {
     margin: 0;
     padding: 0;
@@ -9,7 +7,7 @@
 }
 
 body {
-    background-color: #e3f2fd; /* Balanced background light blue canvas tint */
+    background-color: #e3f2fd;
     color: #333333;
     min-height: 100vh;
     display: flex;
@@ -17,9 +15,7 @@ body {
     overflow-x: hidden;
 }
 
-/* ==========================================
-   HEADER NAVIGATION BAR
-   ========================================== */
+/* HEADER NAVIGATION BAR */
 header {
     background-color: #0d47a1;
     display: flex;
@@ -113,9 +109,7 @@ nav a:hover {
     display: none;
 }
 
-/* ==========================================
-   PORTAL MAIN DUAL-COLUMN LAYOUT
-   ========================================== */
+/* PORTAL MAIN DUAL-COLUMN LAYOUT */
 .portal-container {
     flex: 1;
     display: flex;
@@ -133,9 +127,7 @@ nav a:hover {
     gap: 40px;
 }
 
-/* ==========================================
-   LEFT COMPONENT: USER PORTAL FORM CARD
-   ========================================== */
+/* USER PORTAL FORM CARD */
 .login-card {
     background-color: #ffffff;
     width: 100%;
@@ -233,7 +225,7 @@ nav a:hover {
     color: #01579b;
 }
 
-/* Interactive Action Buttons & Hover configurations */
+/* Action Buttons & Hover */
 .btn-submit-login {
     width: 100%;
     background-color: #ef5350;
@@ -254,7 +246,7 @@ nav a:hover {
     box-shadow: 0 6px 16px rgba(211, 47, 47, 0.3);
 }
 
-/* Custom Horizontal Divider line */
+/* Horizontal Divider line */
 .divider {
     display: flex;
     align-items: center;
@@ -300,7 +292,7 @@ nav a:hover {
 .google-icon {
     width: 18px;
     height: 18px;
-    object-fit: contain; /* Keeps the proportions perfectly square */
+    object-fit: contain; 
     display: inline-block;
 }
 
@@ -325,9 +317,7 @@ nav a:hover {
     color: #01579b;
 }
 
-/* ==========================================
-   RIGHT COMPONENT: ILLUSTRATION SHOWCASE
-   ========================================== */
+/* ILLUSTRATION SHOWCASE */
 .portal-graphic {
     flex: 1;
     display: flex;
@@ -342,9 +332,7 @@ nav a:hover {
     object-fit: contain;
 }
 
-/* ==========================================
-   DYNAMIC AUTH NOTIFICATION CONTAINER
-   ========================================== */
+/* AUTH NOTIFICATION CONTAINER */
 .auth-notification {
     padding: 12px 16px;
     border-radius: 6px;
@@ -356,14 +344,14 @@ nav a:hover {
     transition: all 0.2s ease;
 }
 
-/* Error banner properties */
+/* Error banner */
 .auth-notification.error {
     background-color: #ffebee;
     color: #c62828;
     border-left: 4px solid #ef5350;
 }
 
-/* Success banner properties */
+/* Success banner */
 .auth-notification.success {
     background-color: #e8f5e9;
     color: #2e7d32;
@@ -374,9 +362,7 @@ nav a:hover {
     display: none !important;
 }
 
-/* ==========================================
-   RESPONSIVE MEDIA BREAKPOINTS
-   ========================================== */
+/* RESPONSIVE MEDIA */
 @media (max-width: 992px) {
     .portal-wrapper {
         flex-direction: column;
@@ -384,7 +370,7 @@ nav a:hover {
     }
     
     .portal-graphic {
-        order: -1; /* Pushes the delivery vector artwork to the top on small viewport views */
+        order: -1;
     }
 
     .rider-img {
@@ -393,7 +379,7 @@ nav a:hover {
 }
 
 @media (max-width: 768px) {
-    /* Pure CSS Hamburger Mobile Navigation Menu */
+   
     .nav-toggle-label {
         display: block;
         cursor: pointer;

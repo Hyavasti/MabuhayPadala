@@ -1,6 +1,4 @@
-/* ==========================================
-   BOOKING MODULE MAIN WORKSPACE
-   ========================================== */
+/* BOOKING MODULE MAIN WORKSPACE */
 .booking-wizard-card {
     background-color: #ffffff;
     border-radius: 14px;
@@ -12,9 +10,7 @@
     align-items: center;
 }
 
-/* ==========================================
-   WIZARD MULTI-STEP PROGRESS BAR
-   ========================================== */
+/* MULTI-STEP PROGRESS BAR */
 .wizard-progress-bar {
     display: flex;
     align-items: center;
@@ -37,11 +33,11 @@
 }
 
 .progress-step.current .step-dot {
-    background-color: #0d47a1; /* Active state blue */
+    background-color: #0d47a1;
 }
 
 .progress-step.pending .step-dot {
-    background-color: #e0e0e0; /* Unvisited light grey background */
+    background-color: #e0e0e0;
 }
 
 .step-label {
@@ -55,9 +51,7 @@
     color: #888888;
 }
 
-/* ==========================================
-   TYPOGRAPHY HEADINGS
-   ========================================== */
+/* TYPOGRAPHY HEADINGS */
 .wizard-welcome-heading {
     text-align: center;
     margin-bottom: 45px;
@@ -66,20 +60,18 @@
 .wizard-welcome-heading h1 {
     font-size: 1.85rem;
     font-weight: 800;
-    color: #0c2340; /* Dark premium blue layout focus */
+    color: #0c2340; 
     letter-spacing: 0.5px;
 }
 
 .wizard-welcome-heading p {
     font-size: 0.95rem;
-    color: #ef5350; /* Accent red sub-heading instruction label text */
+    color: #ef5350; 
     font-weight: 600;
     margin-top: 5px;
 }
 
-/* ==========================================
-   SERVICE OPTION CARDS SELECTION GRID
-   ========================================== */
+/* SERVICE OPTION CARDS SELECTION GRID */
 .services-selection-grid {
     display: flex;
     gap: 24px;
@@ -106,11 +98,11 @@
 
 /* Card Selection Active Border State overrides */
 .service-option-card.selected {
-    border: 2px solid #0d47a1; /* Active frame border boundary tracking highlight */
+    border: 2px solid #0d47a1;
     box-shadow: 0 8px 25px rgba(13, 71, 161, 0.08);
 }
 
-/* Corner indicator active confirmation dot element */
+/* Corner indicator active confirmation */
 .selection-indicator-dot {
     position: absolute;
     top: 15px;
@@ -124,7 +116,7 @@
 }
 
 .service-option-card.selected .selection-indicator-dot {
-    background-color: #0d47a1; /* Fills blue when selected */
+    background-color: #0d47a1;
     border-color: #0d47a1;
 }
 
@@ -132,7 +124,7 @@
 .service-icon-box {
     width: 70px;
     height: 70px;
-    background-color: #0d47a1; /* Solid brand base color background block */
+    background-color: #0d47a1;
     color: #ffffff;
     border-radius: 14px;
     display: flex;
@@ -154,7 +146,7 @@
     color: #666666;
     line-height: 1.5;
     margin-bottom: 25px;
-    flex-grow: 1; /* Aligns footer elements cleanly in row items */
+    flex-grow: 1;
 }
 
 .service-badge {
@@ -173,9 +165,7 @@
     box-shadow: 0 6px 15px rgba(0,0,0,0.04);
 }
 
-/* ==========================================
-   WIZARD FOOTER NAVIGATION BUTTONS
-   ========================================== */
+/* WIZARD FOOTER NAVIGATION BUTTONS */
 .wizard-actions-footer {
     width: 100%;
     display: flex;
@@ -183,7 +173,7 @@
 }
 
 .btn-primary-wizard {
-    background-color: #ef5350; /* Primary brand action coral red button */
+    background-color: #ef5350; 
     color: #ffffff;
     border: none;
     padding: 14px 60px;
@@ -204,7 +194,7 @@
     transform: scale(0.98);
 }
 
-/* Responsive Grid Adapters for smaller displays */
+/* Responsive Media */
 @media (max-width: 900px) {
     .services-selection-grid { flex-direction: column; }
     .service-option-card { width: 100%; }

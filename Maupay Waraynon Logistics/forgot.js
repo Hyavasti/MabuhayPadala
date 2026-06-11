@@ -37,9 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
         submitButton.disabled = true;
 
         setTimeout(() => {
-            // 🛠️ PULL SAVED BROWSER ACCOUNTS TO VALIDATE IDENTITY EXISTENCE
+            // SAVED BROWSER ACCOUNTS TO VALIDATE IDENTITY EXISTENCE
             const savedAccountRaw = localStorage.getItem('dummyTestingAccount');
-            let validEmail = "test@gmail.com"; // Standard fallback testing placeholder
+            let validEmail = "test@gmail.com";
 
             if (savedAccountRaw) {
                 const savedAccount = JSON.parse(savedAccountRaw);

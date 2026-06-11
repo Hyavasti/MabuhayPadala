@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pickupCity = document.getElementById("pickupCity");
     const pickupBarangay = document.getElementById("pickupBarangay");
     const pickupStreet = document.getElementById("pickupStreetAddress");
+    const chkSavePickup = document.getElementById("chkSavePickupAddress");
 
     // Dropoff Target Elements (TO)
     const dropoffContact = document.getElementById("dropoffContact");
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dropoffCity = document.getElementById("dropoffCity");
     const dropoffBarangay = document.getElementById("dropoffBarangay");
     const dropoffStreet = document.getElementById("dropoffStreetAddress");
+    const chkSaveDropoff = document.getElementById("chkSaveDropoffAddress");
 
     const btnBack = document.getElementById("btnBackToServices");
     const formWizard = document.getElementById("lipatBahayDetailsForm");
@@ -34,25 +36,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ==========================================
-    // NATIONWIDE COMPLETE PH LOCATIONS ENGINE
-    // ==========================================
-    let phPlacesData = null;
-
-    // Fetch complete official PSGC Geographic structure
+    // =========================================================
+    // 1. NATIONWIDE COMPLETE PH LOCATIONS ENGINE (PSGC API)
+    // =========================================================
+    
+    // Fetch complete official PSGC Geographic structure completely live
     fetch('https://psgc.gitlab.io/api/provinces.json')
         .then(res => res.json())
         .then(provinces => {
-            // Sort provinces alphabetically
             provinces.sort((a, b) => a.name.localeCompare(b.name));
             
-            // Populate BOTH province dropdowns completely
             pickupProvince.innerHTML = '<option value="" disabled selected>Select province</option>';
             dropoffProvince.innerHTML = '<option value="" disabled selected>Select province</option>';
             
             provinces.forEach(prov => {
                 const optFrom = document.createElement("option");
-                optFrom.value = prov.code; // Store the unique PSGC code as value
+                optFrom.value = prov.code; 
                 optFrom.innerText = prov.name;
                 pickupProvince.appendChild(optFrom);
 
@@ -62,15 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 dropoffProvince.appendChild(optTo);
             });
             console.log("🇵🇭 Nationwide Philippine Province Registry Fully Armed & Connected!");
+            
+            // Check if there is cached data to restore AFTER the provinces are loaded
+            restoreCachedFormData();
         })
         .catch(err => console.error("Location API failed to connect:", err));
 
     // Universal handler to wire up Cascading City & Barangay searches dynamically
     function wirePsgcCascadingDropdowns(provinceSelect, citySelect, barangaySelect) {
         
-        // 1. When Province is picked -> Fetch ALL corresponding Cities/Municipalities
-        provinceSelect.addEventListener("change", () => {
+        provinceSelect.addEventListener("change", (e, targetCityCode = null, targetBrgyName = null) => {
             const provinceCode = provinceSelect.value;
+            if (!provinceCode) return;
             
             citySelect.innerHTML = '<option value="" disabled selected>Loading cities...</option>';
             barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
@@ -85,50 +87,63 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     cities.forEach(city => {
                         const opt = document.createElement("option");
-                        opt.value = city.code; // Unique city key
+                        opt.value = city.code; 
                         opt.innerText = city.name;
                         citySelect.appendChild(opt);
                     });
+
+                    // If we have a cached city to restore, set it now
+                    if (targetCityCode) {
+                        citySelect.value = targetCityCode;
+                        // Fire subsequent barangay load event manually
+                        triggerCascadingCityChange(citySelect, barangaySelect, targetBrgyName);
+                    }
                 });
         });
 
-        // 2. When City is picked -> Fetch ALL corresponding Barangays (100% complete)
         citySelect.addEventListener("change", () => {
-            const cityCode = citySelect.value;
-            
-            barangaySelect.innerHTML = '<option value="" disabled selected>Loading barangays...</option>';
-            barangaySelect.disabled = false;
-
-            // Handle whether it's classified as a city or a sub-municipality automatically
-            const targetUrl = `https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays.json`;
-
-            fetch(targetUrl)
-                .then(res => res.json())
-                .then(barangays => {
-                    barangays.sort((a, b) => a.name.localeCompare(b.name));
-                    barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
-                    
-                    barangays.forEach(brgy => {
-                        const opt = document.createElement("option");
-                        opt.value = brgy.name; // Store text name for data logging summary
-                        opt.innerText = brgy.name;
-                        barangaySelect.appendChild(opt);
-                    });
-                })
-                .catch(() => {
-                    // Fallback configuration if API layout changes dynamic endpoints
-                    barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
-                });
+            triggerCascadingCityChange(citySelect, barangaySelect);
         });
     }
 
-    // Activate the live cascading system for both address spaces
+    function triggerCascadingCityChange(citySelect, barangaySelect, targetBrgyName = null) {
+        const cityCode = citySelect.value;
+        if (!cityCode) return;
+        
+        barangaySelect.innerHTML = '<option value="" disabled selected>Loading barangays...</option>';
+        barangaySelect.disabled = false;
+
+        const targetUrl = `https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays.json`;
+
+        fetch(targetUrl)
+            .then(res => res.json())
+            .then(barangays => {
+                barangays.sort((a, b) => a.name.localeCompare(b.name));
+                barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+                
+                barangays.forEach(brgy => {
+                    const opt = document.createElement("option");
+                    opt.value = brgy.name; 
+                    opt.innerText = brgy.name;
+                    barangaySelect.appendChild(opt);
+                });
+
+                // If we have a cached barangay name to restore, set it now
+                if (targetBrgyName) {
+                    barangaySelect.value = targetBrgyName;
+                }
+            })
+            .catch(() => {
+                barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+            });
+    }
+
     wirePsgcCascadingDropdowns(pickupProvince, pickupCity, pickupBarangay);
     wirePsgcCascadingDropdowns(dropoffProvince, dropoffCity, dropoffBarangay);
 
-    // ==========================================
-    // SHORTCUT AUTO-FILL DATA UTILITIES
-    // ==========================================
+    // =========================================================
+    // 2. SHORTCUT AUTO-FILL DATA UTILITIES
+    // =========================================================
     pickupShortcut.addEventListener("change", () => {
         if (pickupShortcut.value === "profile") {
             if (userAccountData) {
@@ -142,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
             pickupContact.value = "";
             pickupMobile.value = "";
             pickupStreet.value = "";
+            chkSavePickup.checked = false;
             pickupProvince.selectedIndex = 0;
             resetSelector(pickupCity, "city/municipality");
             resetSelector(pickupBarangay, "barangay");
@@ -153,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
             dropoffContact.value = "";
             dropoffMobile.value = "";
             dropoffStreet.value = "";
+            chkSaveDropoff.checked = false;
             dropoffProvince.selectedIndex = 0;
             resetSelector(dropoffCity, "city/municipality");
             resetSelector(dropoffBarangay, "barangay");
@@ -164,9 +181,115 @@ document.addEventListener("DOMContentLoaded", () => {
         element.disabled = true;
     }
 
-    // ==========================================
-    // ACTION CONTROL BUTTON ROUTING
-    // ==========================================
+    // =========================================================
+    // 3. STATE PERSISTENCE ENGINE (RESTORE ON BACK NAVIGATION)
+    // =========================================================
+    function restoreCachedFormData() {
+        const activeDetailsCache = localStorage.getItem('activeBookingFormStep2');
+        if (!activeDetailsCache) return;
+
+        try {
+            const cachedData = JSON.parse(activeDetailsCache);
+
+            // Restore Current Address (From) fields and cascaded values
+            if (cachedData.origin) {
+                pickupContact.value = cachedData.origin.name || "";
+                pickupMobile.value = cachedData.origin.phone || "";
+                pickupStreet.value = cachedData.origin.street || "";
+                chkSavePickup.checked = cachedData.origin.shouldSaveToAddressBook || false;
+
+                if (cachedData.origin.provinceCode) {
+                    pickupProvince.value = cachedData.origin.provinceCode;
+                    // Force the province element to trigger city populates via arguments
+                    const event = new Event('change');
+                    pickupProvince.dispatchEvent(event);
+                    
+                    // Wire up the asynchronous restoration loop
+                    setTimeout(() => {
+                        pickupProvince.dispatchEvent(new Event('change'));
+                    }, 50);
+                    
+                    // Execute manual invocation to pass code state parameters down the chain
+                    let citySelectHandler = pickupProvince.listeners?.change || function() {
+                        // Custom handler bypass to catch dropdown timings natively
+                        const pCode = pickupProvince.value;
+                        fetch(`https://psgc.gitlab.io/api/provinces/${pCode}/cities-municipalities.json`)
+                            .then(r => r.json()).then(cities => {
+                                pickupCity.innerHTML = '<option value="" disabled selected>Select city/municipality</option>';
+                                cities.sort((a, b) => a.name.localeCompare(b.name));
+                                cities.forEach(c => {
+                                    const o = new Option(c.name, c.code);
+                                    pickupCity.add(o);
+                                });
+                                if (cachedData.origin.cityCode) {
+                                    pickupCity.value = cachedData.origin.cityCode;
+                                    pickupCity.disabled = false;
+                                    
+                                    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cachedData.origin.cityCode}/barangays.json`)
+                                        .then(r => r.json()).then(brgys => {
+                                            pickupBarangay.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+                                            brgys.sort((a, b) => a.name.localeCompare(b.name));
+                                            brgys.forEach(b => { pickupBarangay.add(new Option(b.name, b.name)); });
+                                            if (cachedData.origin.barangay) {
+                                                pickupBarangay.value = cachedData.origin.barangay;
+                                                pickupBarangay.disabled = false;
+                                            }
+                                        });
+                                }
+                            });
+                    };
+                    citySelectHandler();
+                }
+            }
+
+            // Restore New Address (To) fields and cascaded values
+            if (cachedData.destination) {
+                dropoffContact.value = cachedData.destination.name || "";
+                dropoffMobile.value = cachedData.destination.phone || "";
+                dropoffStreet.value = cachedData.destination.street || "";
+                chkSaveDropoff.checked = cachedData.destination.shouldSaveToAddressBook || false;
+
+                if (cachedData.destination.provinceCode) {
+                    dropoffProvince.value = cachedData.destination.provinceCode;
+                    
+                    let citySelectHandlerTo = function() {
+                        const pCode = dropoffProvince.value;
+                        fetch(`https://psgc.gitlab.io/api/provinces/${pCode}/cities-municipalities.json`)
+                            .then(r => r.json()).then(cities => {
+                                dropoffCity.innerHTML = '<option value="" disabled selected>Select city/municipality</option>';
+                                cities.sort((a, b) => a.name.localeCompare(b.name));
+                                cities.forEach(c => {
+                                    const o = new Option(c.name, c.code);
+                                    dropoffCity.add(o);
+                                });
+                                if (cachedData.destination.cityCode) {
+                                    dropoffCity.value = cachedData.destination.cityCode;
+                                    dropoffCity.disabled = false;
+                                    
+                                    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${cachedData.destination.cityCode}/barangays.json`)
+                                        .then(r => r.json()).then(brgys => {
+                                            dropoffBarangay.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+                                            brgys.sort((a, b) => a.name.localeCompare(b.name));
+                                            brgys.forEach(b => { dropoffBarangay.add(new Option(b.name, b.name)); });
+                                            if (cachedData.destination.barangay) {
+                                                dropoffBarangay.value = cachedData.destination.barangay;
+                                                dropoffBarangay.disabled = false;
+                                            }
+                                        });
+                                }
+                            });
+                    };
+                    citySelectHandlerTo();
+                }
+            }
+        } catch (err) {
+            console.error("Error reading persistence data models:", err);
+        }
+    }
+
+    // =========================================================
+    // 4. ACTION CONTROL NAVIGATION & SUBMIT SUBMISSION TIMELINE
+    // =========================================================
     btnBack.addEventListener("click", () => {
         window.location.href = "book-shipment.html";
     });
@@ -174,7 +297,12 @@ document.addEventListener("DOMContentLoaded", () => {
     formWizard.addEventListener("submit", (e) => {
         e.preventDefault();
 
-        // Get textual names instead of raw code tokens for storage payload
+        // Security Validation Guard Rails for mobile number string properties
+        if (pickupMobile.value.length < 11 || dropoffMobile.value.length < 11) {
+            alert("❌ Mobile numbers must be accurate contact text strings (Minimum 11 numbers).");
+            return;
+        }
+
         const selectedOrigProv = pickupProvince.options[pickupProvince.selectedIndex].text;
         const selectedOrigCity = pickupCity.options[pickupCity.selectedIndex].text;
         const selectedDestProv = dropoffProvince.options[dropoffProvince.selectedIndex].text;
@@ -186,22 +314,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 name: pickupContact.value,
                 phone: pickupMobile.value,
                 province: selectedOrigProv,
+                provinceCode: pickupProvince.value, // Retained to trace the API branch on back steps
                 city: selectedOrigCity,
+                cityCode: pickupCity.value,         // Retained to trace the API branch on back steps
                 barangay: pickupBarangay.value,
-                street: pickupStreet.value
+                street: pickupStreet.value,
+                shouldSaveToAddressBook: chkSavePickup.checked
             },
             destination: {
                 name: dropoffContact.value,
                 phone: dropoffMobile.value,
                 province: selectedDestProv,
+                provinceCode: dropoffProvince.value, // Retained to trace the API branch on back steps
                 city: selectedDestCity,
+                cityCode: dropoffCity.value,         // Retained to trace the API branch on back steps
                 barangay: dropoffBarangay.value,
-                street: dropoffStreet.value
+                street: dropoffStreet.value,
+                shouldSaveToAddressBook: chkSaveDropoff.checked
             }
         };
 
         localStorage.setItem('activeBookingFormStep2', JSON.stringify(completeNationalPayload));
         console.log("Success! Nationwide address log generated safely:", completeNationalPayload);
-        alert("Symmetrical nationwide address verified! Proceeding to Step 3.");
+        
+        // Corrected route direction mapping link -> Goes to Step 2 Move Info next!
+        window.location.href = "book-lipatbahay-info.html";
     });
 });

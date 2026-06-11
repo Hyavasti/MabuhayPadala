@@ -1,6 +1,4 @@
-/* ==========================================
-   GLOBAL RESET VARIABLES
-   ========================================== */
+/* GLOBAL SETTINGS */
 * {
     margin: 0;
     padding: 0;
@@ -19,12 +17,10 @@ body {
     min-height: 100vh;
 }
 
-/* ==========================================
-   LEFT DEEP BLUE VIEWPORT SIDEBAR
-   ========================================== */
+/* LEFT VIEWPORT SIDEBAR */
 .sidebar {
     width: 260px;
-    background-color: #0d47a1; /* Deep brand blue corporate primary layout */
+    background-color: #0d47a1; 
     color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -91,12 +87,12 @@ body {
 }
 
 .menu-item:hover, .menu-item.active {
-    background-color: #1565c0; /* Bright accent highlight grid state */
+    background-color: #1565c0; 
     color: #ffffff;
 }
 
 .menu-item.active {
-    border-left: 4px solid #ef5350; /* Left side bar target focus tag indicator */
+    border-left: 4px solid #ef5350; 
     padding-left: 20px;
 }
 
@@ -109,9 +105,7 @@ body {
     color: #ffffff;
 }
 
-/* ==========================================
-   MAIN DASHBOARD WORKSPACE GRID PANELS
-   ========================================== */
+/* MAIN DASHBOARD WORKSPACE GRID PANELS */
 .main-content {
     flex: 1;
     padding: 25px 35px;
@@ -408,9 +402,7 @@ body {
     border-bottom: 1px solid #f0f4f8;
 }
 
-/* ==========================================
-   RIGHT ACTION AND NOTIFICATION BOARD PANELS
-   ========================================== */
+/* RIGHT ACTION AND NOTIFICATION BOARD PANELS */
 .sidebar-card-box {
     background: #ffffff;
     border-radius: 14px;
@@ -439,7 +431,7 @@ body {
 
 .btn-track-action {
     width: 100%;
-    background-color: #ef5350; /* Red primary brand action focus buttons */
+    background-color: #ef5350;
     color: #ffffff;
     border: none;
     padding: 11px;
@@ -485,9 +477,7 @@ body {
     display: block;
 }
 
-/* ==========================================
-   RESPONSIVE DESIGN ADAPTATIONS
-   ========================================== */
+/* RESPONSIVE DESIGN ADAPTATIONS */
 @media (max-width: 1200px) {
     .dashboard-grid-layout { flex-direction: column; }
     .primary-column, .secondary-column { width: 100%; }

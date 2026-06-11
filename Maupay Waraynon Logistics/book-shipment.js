@@ -2,13 +2,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const serviceCards = document.querySelectorAll(".service-option-card");
     const btnContinue = document.getElementById("btnContinueBooking");
     const profileAvatar = document.getElementById("profileAvatar");
-
-    // Variable track to store selection code state parameters (defaults to standard card)
+    const cardStandardParcel = document.getElementById("cardStandardParcel");
+    // Variable track to store selection code state parameters
     let selectedService = "standard"; 
 
-    // ==========================================
+    
     // PROFILE SESSION DISPLAY LOADER
-    // ==========================================
     const savedAccountRaw = localStorage.getItem('dummyTestingAccount');
     if (savedAccountRaw) {
         const userAccount = JSON.parse(savedAccountRaw);
@@ -18,9 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ==========================================
+
+
     // INTERACTIVE SELECTION EVENT HANDLING
-    // ==========================================
+
     serviceCards.forEach(card => {
         card.addEventListener("click", () => {
             // 1. Clear existing active frame selection attributes from all cards
@@ -35,13 +35,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // ==========================================
     // STEP TRANSITION CONTINUATION TRIGGER
-    // ==========================================
-    // Inside your original book-shipment.js file continuation handler:
+
+    // Standard Parcel service option
+if (cardStandardParcel) {
+        // Change the mouse cursor to a pointer so users know it's clickable
+        cardStandardParcel.style.cursor = "pointer";
+
+        cardStandardParcel.addEventListener("click", () => {
+            // Clear out any old stale temporary booking manifests from previous attempts
+            localStorage.removeItem('consolidatedBookingManifest');
+            
+            // Navigate cleanly to your newly created Step 1 form page
+            window.location.href = "book-standard-parcel-details.html";
+        });
+    }
+
+    // Lipat Bahay service option
 btnContinue.addEventListener("click", () => {
     if (selectedService === "lipat-bahay") {
-        window.location.href = "book-lipatbahay.html"; // Open your newly loaded form screen!
+        window.location.href = "book-lipatbahay.html";
     } else {
         alert(`Selected ${selectedService}. Booking form routes for this sector are currently preparation nodes.`);
     }
