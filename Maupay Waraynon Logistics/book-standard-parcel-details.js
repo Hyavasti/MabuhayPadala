@@ -3,20 +3,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnBackToShipmentMenu = document.getElementById("btnBackToShipmentMenu");
     const deliveryCards = document.querySelectorAll('.delivery-option-card');
     
-    // Form Dropdown Element References
+    // Form Dropdown Element References (Region -> Province -> City -> Barangay)
+    const senderRegion = document.getElementById("senderRegion");
     const senderProvince = document.getElementById("senderProvince");
     const senderCity = document.getElementById("senderCity");
     const senderBarangay = document.getElementById("senderBarangay");
 
+    const receiverRegion = document.getElementById("receiverRegion");
     const receiverProvince = document.getElementById("receiverProvince");
     const receiverCity = document.getElementById("receiverCity");
+    const receiverBarangay = document.getElementById("receiverBarangay");
     const receiverOutlet = document.getElementById("receiverOutlet");
 
     // Dynamic Display Segment Containers
     const receiverDoorToDoorFields = document.getElementById("receiverDoorToDoorFields");
     const receiverPickupOutletFields = document.getElementById("receiverPickupOutletFields");
 
-    // Text Input Element References (Names & Phones)
+    // Text Input Element References
     const senderName = document.getElementById("senderName");
     const receiverName = document.getElementById("receiverName");
     const senderMobile = document.getElementById("senderMobile");
@@ -25,6 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save Address Checkboxes References
     const saveSenderAddress = document.getElementById("saveSenderAddress");
     const saveReceiverAddress = document.getElementById("saveReceiverAddress");
+
+    // Global Memory Cache Filtering
+    let cachedRegionsList = [];
+    let cachedProvincesList = [];
+    let cachedCitiesMunicipalitiesList = [];
 
     // Profile Avatar Display Setup
     const profileAvatar = document.getElementById("profileAvatar");
@@ -36,24 +44,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    
-    //CONTACT PERSON STRICT NAME VALIDATION
+    // CONTACT PERSON STRICT NAME VALIDATION
     function sanitizeContactNameInput(inputElement) {
+        if (!inputElement) return;
         inputElement.addEventListener("input", (e) => {
-            // Replace any numerical digits (0-9) with an empty string
             let sanitizedValue = e.target.value.replace(/[0-9]/g, "");
             e.target.value = sanitizedValue;
         });
     }
 
-    // Apply name filters to both Contact Person fields
     sanitizeContactNameInput(senderName);
     sanitizeContactNameInput(receiverName);
 
-
-
     // PHONE NUMBER STRICT VALIDATION & SANITIZATION
     function sanitizePhoneNumberInput(inputElement) {
+        if (!inputElement) return;
         inputElement.addEventListener("input", (e) => {
             let sanitizedValue = e.target.value.replace(/\D/g, "");
             if (sanitizedValue.length > 11) {
@@ -66,63 +71,103 @@ document.addEventListener("DOMContentLoaded", () => {
     sanitizePhoneNumberInput(senderMobile);
     sanitizePhoneNumberInput(receiverMobile);
 
-    // PSGC API DATA ENGINE (ENTIRE PHILIPPINES)
+    // PSGC ENGINE
     const PSGC_BASE_URL = "https://psgc.gitlab.io/api";
 
-    async function initializeProvinces() {
+    async function prefetchNationalGeographicRegistry() {
         try {
-            const response = await fetch(`${PSGC_BASE_URL}/provinces.json`);
-            const provinces = await response.json();
-            provinces.sort((a, b) => a.name.localeCompare(b.name));
+            const [regionsRes, provincesRes, citiesRes] = await Promise.all([
+                fetch(`${PSGC_BASE_URL}/regions.json`),
+                fetch(`${PSGC_BASE_URL}/provinces.json`),
+                fetch(`${PSGC_BASE_URL}/cities-municipalities.json`)
+            ]);
 
-            senderProvince.innerHTML = '<option value="" disabled selected>Select province</option>';
-            receiverProvince.innerHTML = '<option value="" disabled selected>Select province</option>';
+            cachedRegionsList = await regionsRes.json();
+            cachedProvincesList = await provincesRes.json();
+            cachedCitiesMunicipalitiesList = await citiesRes.json();
 
-            provinces.forEach(prov => {
-                const optSender = document.createElement("option");
-                optSender.value = prov.code; 
-                optSender.textContent = prov.name;
-                optSender.setAttribute('data-name', prov.name);
-                senderProvince.appendChild(optSender);
-
-                const optReceiver = document.createElement("option");
-                optReceiver.value = prov.code;
-                optReceiver.textContent = prov.name;
-                optReceiver.setAttribute('data-name', prov.name);
-                receiverProvince.appendChild(optReceiver);
-            });
+            cachedRegionsList.sort((a, b) => a.name.localeCompare(b.name));
+            populateRegionDropdowns();
         } catch (error) {
-            console.error("Error downloading national PSGC province lists:", error);
+            console.error("Critical error building regional cache:", error);
         }
     }
 
-    async function handleProvinceChange(provinceSelect, citySelect, barangaySelect = null) {
-        const selectedProvinceCode = provinceSelect.value;
+    function populateRegionDropdowns() {
+        const fallbackOption = '<option value="" disabled selected>Select region</option>';
+        if (senderRegion) senderRegion.innerHTML = fallbackOption;
+        if (receiverRegion) receiverRegion.innerHTML = fallbackOption;
+
+        cachedRegionsList.forEach(region => {
+            const opt = document.createElement("option");
+            opt.value = region.code;
+            opt.textContent = region.name;
+            opt.setAttribute("data-name", region.name);
+
+            if (senderRegion) senderRegion.appendChild(opt.cloneNode(true));
+            if (receiverRegion) receiverRegion.appendChild(opt.cloneNode(true));
+        });
+    }
+
+    function handleRegionSelectionChange(regionSelect, provinceSelect, citySelect, barangaySelect = null) {
+        const selectedRegionCode = regionSelect.value;
+        provinceSelect.innerHTML = '<option value="" disabled selected>Select province</option>';
         citySelect.innerHTML = '<option value="" disabled selected>Select city/municipality</option>';
-        if (barangaySelect) {
-            barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+        if (barangaySelect) barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+
+        if (!selectedRegionCode) return;
+
+        if (selectedRegionCode === "130000000") {
+            const optNCR = document.createElement("option");
+            optNCR.value = "130000000";
+            optNCR.textContent = "METRO MANILA (NCR)";
+            optNCR.setAttribute("data-name", "METRO MANILA (NCR)");
+            provinceSelect.appendChild(optNCR);
+            
+            provinceSelect.value = "130000000";
+            handleProvinceSelectionChange(provinceSelect, citySelect, barangaySelect);
+            return;
         }
 
-        if (!selectedProvinceCode) return;
+        const filteredProvinces = cachedProvincesList.filter(p => p.regionCode === selectedRegionCode);
+        filteredProvinces.sort((a, b) => a.name.localeCompare(b.name));
 
-        try {
-            const response = await fetch(`${PSGC_BASE_URL}/provinces/${selectedProvinceCode}/cities-municipalities.json`);
-            const cities = await response.json();
-            cities.sort((a, b) => a.name.localeCompare(b.name));
-
-            cities.forEach(city => {
-                const opt = document.createElement("option");
-                opt.value = city.code;
-                opt.textContent = city.name;
-                opt.setAttribute('data-name', city.name);
-                citySelect.appendChild(opt);
-            });
-        } catch (error) {
-            console.error("Error pulling PSGC city maps:", error);
-        }
+        filteredProvinces.forEach(prov => {
+            const opt = document.createElement("option");
+            opt.value = prov.code;
+            opt.textContent = prov.name;
+            opt.setAttribute("data-name", prov.name);
+            provinceSelect.appendChild(opt);
+        });
     }
 
-    async function handleCityChange(citySelect, barangaySelect) {
+    function handleProvinceSelectionChange(provinceSelect, citySelect, barangaySelect = null) {
+        const selectedProvCode = provinceSelect.value;
+        citySelect.innerHTML = '<option value="" disabled selected>Select city/municipality</option>';
+        if (barangaySelect) barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
+
+        if (!selectedProvCode) return;
+
+        let isolatedCities = [];
+        if (selectedProvCode === "130000000") {
+            isolatedCities = cachedCitiesMunicipalitiesList.filter(c => c.regionCode === "130000000");
+        } else {
+            isolatedCities = cachedCitiesMunicipalitiesList.filter(c => c.provinceCode === selectedProvCode);
+        }
+
+        isolatedCities.sort((a, b) => a.name.localeCompare(b.name));
+
+        isolatedCities.forEach(city => {
+            const opt = document.createElement("option");
+            opt.value = city.code;
+            opt.textContent = city.name;
+            opt.setAttribute("data-name", city.name);
+            citySelect.appendChild(opt);
+        });
+    }
+
+    async function handleCitySelectionChange(citySelect, barangaySelect) {
+        if (!barangaySelect) return;
         const selectedCityCode = citySelect.value;
         barangaySelect.innerHTML = '<option value="" disabled selected>Select barangay</option>';
 
@@ -137,22 +182,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 const opt = document.createElement("option");
                 opt.value = brgy.code;
                 opt.textContent = brgy.name;
-                opt.setAttribute('data-name', brgy.name);
+                opt.setAttribute("data-name", brgy.name);
                 barangaySelect.appendChild(opt);
             });
         } catch (error) {
-            console.error("Error pulling PSGC barangay maps:", error);
+            console.error("Error retrieving dynamic barangay list:", error);
         }
     }
 
-    senderProvince.addEventListener("change", () => handleProvinceChange(senderProvince, senderCity, senderBarangay));
-    senderCity.addEventListener("change", () => handleCityChange(senderCity, senderBarangay));
-    receiverProvince.addEventListener("change", () => handleProvinceChange(receiverProvince, receiverCity));
+    if (senderRegion) senderRegion.addEventListener("change", () => handleRegionSelectionChange(senderRegion, senderProvince, senderCity, senderBarangay));
+    if (senderProvince) senderProvince.addEventListener("change", () => handleProvinceSelectionChange(senderProvince, senderCity, senderBarangay));
+    if (senderCity) senderCity.addEventListener("change", () => handleCitySelectionChange(senderCity, senderBarangay));
 
-    initializeProvinces();
+    if (receiverRegion) receiverRegion.addEventListener("change", () => handleRegionSelectionChange(receiverRegion, receiverProvince, receiverCity, receiverBarangay));
+    if (receiverProvince) receiverProvince.addEventListener("change", () => handleProvinceSelectionChange(receiverProvince, receiverCity, receiverBarangay));
+    if (receiverCity) receiverCity.addEventListener("change", () => handleCitySelectionChange(receiverCity, receiverBarangay));
 
-
-    //DYNAMIC TABS TOGGLE LOGIC: DOOR-TO-DOOR vs PICKUP TO OUTLET
+    prefetchNationalGeographicRegistry();
 
     deliveryCards.forEach(card => {
         card.addEventListener("click", (e) => {
@@ -172,26 +218,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const receiverStreet = document.getElementById("receiverStreet");
 
         if (option === "PickupOutlet") {
-            receiverDoorToDoorFields.classList.add("hidden-field-block");
-            receiverPickupOutletFields.classList.remove("hidden-field-block");
+            if (receiverDoorToDoorFields) receiverDoorToDoorFields.classList.add("hidden-field-block");
+            if (receiverPickupOutletFields) receiverPickupOutletFields.classList.remove("hidden-field-block");
 
-            receiverProvince.required = false;
-            receiverCity.required = false;
-            receiverStreet.required = false;
-            receiverOutlet.required = true;
+            if (receiverRegion) receiverRegion.required = false;
+            if (receiverProvince) receiverProvince.required = false;
+            if (receiverCity) receiverCity.required = false;
+            if (receiverBarangay) receiverBarangay.required = false;
+            if (receiverStreet) receiverStreet.required = false;
+            if (receiverOutlet) receiverOutlet.required = true;
         } else {
-            receiverDoorToDoorFields.classList.remove("hidden-field-block");
-            receiverPickupOutletFields.classList.add("hidden-field-block");
+            if (receiverDoorToDoorFields) receiverDoorToDoorFields.classList.remove("hidden-field-block");
+            if (receiverPickupOutletFields) receiverPickupOutletFields.classList.add("hidden-field-block");
 
-            receiverProvince.required = true;
-            receiverCity.required = true;
-            receiverStreet.required = true;
-            receiverOutlet.required = false;
+            if (receiverRegion) receiverRegion.required = true;
+            if (receiverProvince) receiverProvince.required = true;
+            if (receiverCity) receiverCity.required = true;
+            if (receiverBarangay) receiverBarangay.required = true;
+            if (receiverStreet) receiverStreet.required = true;
+            if (receiverOutlet) receiverOutlet.required = false;
         }
     }
 
-
-    // NAVIGATION SUBMISSIONS & WORKSPACE PERSISTENCE
     if (btnBackToShipmentMenu) {
         btnBackToShipmentMenu.addEventListener("click", () => {
             window.location.href = "book-shipment.html";
@@ -209,47 +257,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const selectedOption = document.querySelector('input[name="deliveryOption"]:checked').value;
 
-            const senderProvName = senderProvince.options[senderProvince.selectedIndex].getAttribute('data-name');
-            const senderCityName = senderCity.options[senderCity.selectedIndex].getAttribute('data-name');
-            const senderBrgyName = senderBarangay.options[senderBarangay.selectedIndex].getAttribute('data-name');
+            // Safe lookup helper to prevent errors if elements aren't selected yet
+            const getSelectedText = (el) => el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].getAttribute('data-name') || "" : "";
+
+            const senderRegionName = getSelectedText(senderRegion);
+            const senderProvName = getSelectedText(senderProvince);
+            const senderCityName = getSelectedText(senderCity);
+            const senderBrgyName = getSelectedText(senderBarangay);
+            
+            const senderStreetEl = document.getElementById("senderStreet");
+            const senderStreetVal = senderStreetEl ? senderStreetEl.value.trim() : "Main Parcel Terminal";
+
+            // Compile the sender address directly into a unified flat string
+            const senderAddressParts = [senderStreetVal, senderBrgyName, senderCityName, senderProvName].filter(p => p && p.trim() !== "");
+            const combinedSenderAddress = senderAddressParts.length > 0 ? senderAddressParts.join(", ") : "Main Parcel Terminal";
 
             let receiverDestinationSummary = {};
+            let simplifiedDestinationString = "";
 
             if (selectedOption === "PickupOutlet") {
+                simplifiedDestinationString = receiverOutlet.value;
                 receiverDestinationSummary = {
                     isOutletDropoff: true,
-                    assignedOutletHub: receiverOutlet.value
+                    assignedOutletHub: receiverOutlet.value,
+                    streetAddress: receiverOutlet.value,
+                    barangay: "",
+                    city: "",
+                    province: "",
+                    region: ""
                 };
             } else {
-                const receiverProvName = receiverProvince.options[receiverProvince.selectedIndex].getAttribute('data-name');
-                const receiverCityName = receiverCity.options[receiverCity.selectedIndex].getAttribute('data-name');
+                const receiverRegionName = getSelectedText(receiverRegion);
+                const receiverProvName = getSelectedText(receiverProvince);
+                const receiverCityName = getSelectedText(receiverCity);
+                const receiverBrgyName = getSelectedText(receiverBarangay);
+                const receiverStreetVal = document.getElementById("receiverStreet") ? document.getElementById("receiverStreet").value.trim() : "";
+
+                simplifiedDestinationString = `${receiverCityName}, ${receiverProvName}`;
+                
                 receiverDestinationSummary = {
                     isOutletDropoff: false,
+                    region: receiverRegionName,
                     province: receiverProvName,
                     city: receiverCityName,
-                    street: document.getElementById("receiverStreet").value.trim()
+                    barangay: receiverBrgyName,
+                    streetAddress: receiverStreetVal
                 };
             }
 
             const shouldSaveSender = saveSenderAddress ? saveSenderAddress.checked : false;
             const shouldSaveReceiver = saveReceiverAddress ? saveReceiverAddress.checked : false;
+            const resolvedServiceType = sessionStorage.getItem("activeBookingServiceType") || "Standard Parcel";
 
+            // Unified, cross-compatible object model payload layout
             const trackingManifest = {
-                serviceWorkflowType: "Standard Parcel",
+                serviceWorkflowType: resolvedServiceType,
                 deliveryArrangementOption: selectedOption,
+                dashboardDisplayDestination: simplifiedDestinationString,
                 saveSenderToAddressBook: shouldSaveSender,
                 saveReceiverToAddressBook: shouldSaveReceiver,
                 senderContactDetails: {
                     fullName: senderName.value.trim(),
-                    mobile: senderMobile.value,
+                    phoneNumber: senderMobile.value, // FIXED: Changed from .mobile to .phoneNumber
+                    region: senderRegionName,
                     province: senderProvName,
                     city: senderCityName,
                     barangay: senderBrgyName,
-                    street: document.getElementById("senderStreet").value.trim()
+                    streetAddress: senderStreetVal,
+                    fullAddress: combinedSenderAddress // FIXED: Flat fallback variable added
                 },
                 receiverContactDetails: {
                     fullName: receiverName.value.trim(),
-                    mobile: receiverMobile.value,
+                    phoneNumber: receiverMobile.value, // FIXED: Changed from .mobile to .phoneNumber
                     ...receiverDestinationSummary
                 }
             };

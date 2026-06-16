@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const SURCHARGE_PER_OVERWEIGHT_KG = 20.00;
     const DECLARED_VALUE_INSURANCE_RATE = 0.10; 
 
-    
     // Profile Avatar Letter Display Configs
     const profileAvatar = document.getElementById("profileAvatar");
     const savedAccountRaw = localStorage.getItem('dummyTestingAccount');
@@ -30,10 +29,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    
-    //LIVE PARCEL FARE COST ENGINE CALCULATIONS
-    
+    // ==========================================================================
+    // ✨ ADDED: RESTORE EXISTING PRE-FILLED VALUES (Including Special Instructions)
+    // ==========================================================================
+    const sessionManifestStringData = localStorage.getItem('consolidatedBookingManifest');
+    if (sessionManifestStringData) {
+        const activeBookingManifestObject = JSON.parse(sessionManifestStringData);
+        const pkgConfig = activeBookingManifestObject.packageConfiguration;
+        
+        if (pkgConfig) {
+            if (itemDescription && pkgConfig.description) itemDescription.value = pkgConfig.description;
+            if (itemCategory && pkgConfig.category) itemCategory.value = pkgConfig.category;
+            if (pkgWeight && pkgConfig.weightKg) pkgWeight.value = pkgConfig.weightKg;
+            if (declaredValue && pkgConfig.declaredValue) declaredValue.value = pkgConfig.declaredValue;
+            
+            if (pkgConfig.dimensions) {
+                if (pkgLength && pkgConfig.dimensions.length) pkgLength.value = pkgConfig.dimensions.length;
+                if (pkgWidth && pkgConfig.dimensions.width) pkgWidth.value = pkgConfig.dimensions.width;
+                if (pkgHeight && pkgConfig.dimensions.height) pkgHeight.value = pkgConfig.dimensions.height;
+            }
+            
+            // Restore special instructions to input element safely
+            if (specialInstructions) {
+                specialInstructions.value = pkgConfig.specialHandlingNotes || pkgConfig.specialHandlingInstructions || "";
+            }
+        }
+    }
+
+    // LIVE PARCEL FARE COST ENGINE CALCULATIONS
     function runLiveDynamicFareQuote() {
+        if (!pkgWeight || !declaredValue || !displayFare) return;
+
         const currentWeightValue = parseFloat(pkgWeight.value) || 0;
         const totalDeclaredValValue = parseFloat(declaredValue.value) || 0;
 
@@ -54,6 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
     calculationInputElements.forEach(inputComponent => {
         inputComponent.addEventListener("input", runLiveDynamicFareQuote);
         
+        // Auto-clear default '0' values when the user clicks/focuses on the input
+        inputComponent.addEventListener("focus", (event) => {
+            if (event.target.value === "0" || parseFloat(event.target.value) === 0) {
+                event.target.value = "";
+            }
+        });
+
         // Zero-value protection fallback rule on out-of-bounds focus losses
         inputComponent.addEventListener("blur", (event) => {
             if (event.target.value.trim() === "" || parseFloat(event.target.value) < 0) {
@@ -63,10 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-
-    
     // WORKFLOW INTER-PAGE REDIRECTIONS & TRANSACTIONS MAPPINGS
-    
     if (btnBackToDetails) {
         btnBackToDetails.addEventListener("click", () => {
             window.location.href = "book-standard-parcel-details.html";
@@ -78,14 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
 
             // Pull matching cross-page historical information maps
-            const sessionManifestStringData = localStorage.getItem('consolidatedBookingManifest');
-            if (!sessionManifestStringData) {
+            const freshManifestStringData = localStorage.getItem('consolidatedBookingManifest');
+            if (!freshManifestStringData) {
                 alert("❌ Your booking session has expired. Returning to Step 1.");
                 window.location.href = "book-standard-parcel-details.html";
                 return;
             }
 
-            const activeBookingManifestObject = JSON.parse(sessionManifestStringData);
+            const activeBookingManifestObject = JSON.parse(freshManifestStringData);
 
             // Compute ledger variables
             const finalCalculatedWeightValue = parseFloat(pkgWeight.value) || 0;
@@ -98,16 +128,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Save detailed structural package parameters back inside manifest tracking loop
             activeBookingManifestObject.packageConfiguration = {
-                description: itemDescription.value.trim(),
-                category: itemCategory.value,
+                description: itemDescription ? itemDescription.value.trim() : "",
+                category: itemCategory ? itemCategory.value : "",
                 dimensions: {
-                    length: parseInt(pkgLength.value) || 0,
-                    width: parseInt(pkgWidth.value) || 0,
-                    height: parseInt(pkgHeight.value) || 0
+                    length: pkgLength ? (parseInt(pkgLength.value) || 0) : 0,
+                    width: pkgWidth ? (parseInt(pkgWidth.value) || 0) : 0,
+                    height: pkgHeight ? (parseInt(pkgHeight.value) || 0) : 0
                 },
                 weightKg: finalCalculatedWeightValue,
-                declaredValuePhp: finalValuationDeclaredValue,
-                specialHandlingNotes: specialInstructions.value.trim()
+                declaredValue: finalValuationDeclaredValue,
+                specialHandlingNotes: specialInstructions ? specialInstructions.value.trim() : "" // Keeps note saved under normalized key
             };
 
             // Inject cost billing parameters for Step 3 Summary panel card engines
@@ -118,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 grandTotal: computedAbsoluteGrandTotal
             };
 
-            // Commit complete state changes into system memory space
+            // Commit complete state changes into system temporary memory space
             localStorage.setItem('consolidatedBookingManifest', JSON.stringify(activeBookingManifestObject));
 
             // Forward directly to Step 3: Payment page file layout
@@ -126,6 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Fire default render quote sequence
+    // Fire default render quote sequence on load
     runLiveDynamicFareQuote();
 });

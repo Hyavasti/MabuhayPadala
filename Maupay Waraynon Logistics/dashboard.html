@@ -22,10 +22,10 @@
 
             <div class="menu-section-label">MENU</div>
             <nav class="sidebar-menu">
-                <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Overview</a>
+                <a href="dashboard.html" class="menu-item active"><i class="fas fa-th-large"></i> Overview</a>
                 <a href="book-shipment.html" class="menu-item"><i class="fas fa-shopping-cart"></i> Book a Shipment</a>
-                <a href="#" class="menu-item"><i class="fas fa-map-marker-alt"></i> Track Parcel</a>
-                <a href="#" class="menu-item"><i class="fas fa-book"></i> My Bookings</a>
+                <a href="track-parcel.html" class="menu-item"><i class="fas fa-map-marker-alt"></i> Track Parcel</a>
+                <a href="my-bookings.html" class="menu-item"><i class="fas fa-book"></i> My Bookings</a>
                 <a href="#" class="menu-item"><i class="fas fa-check-circle"></i> Claims</a>
                 <a href="#" class="menu-item"><i class="fas fa-comment-alt"></i> Feedback</a>
             </nav>
@@ -40,7 +40,7 @@
         </aside>
 
         <main class="main-content">
-            
+    
             <header class="content-header">
                 <h2>Overview</h2>
                 <div class="user-profile-badge">
@@ -53,9 +53,9 @@
                 <div class="primary-column">
                     
                     <section class="welcome-banner">
-                        <span class="banner-date">Sunday, 19 April 2026</span>
+                        <span class="banner-date" id="liveDashboardDate">Sunday, 19 April 2026</span>
                         <h1 id="welcomeGreeting">Good Evening, User</h1>
-                        <p>You have 2 active shipments and 1 payment pending</p>
+                        <p id="welcomeSummaryLabel">You have 0 active shipments recorded.</p>
                     </section>
 
                     <section class="satisfaction-hero">
@@ -66,31 +66,42 @@
                         
                         <div class="metrics-row">
                             <div class="metric-mini-card">
-                                <div class="metric-block-icon blue-bg"></div>
+                                <div class="metric-block-icon total-bg">
+                                    <i class="fas fa-cubes"></i>
+                                </div>
                                 <div class="metric-data-info">
-                                    <span class="lbl">Lorem Ipsum</span>
-                                    <h3>21 <span class="trend-pct">+3%</span></h3>
+                                    <span class="lbl">Total Bookings</span>
+                                    <h3 id="metricTotalBookings">0</h3>
                                 </div>
                             </div>
+
                             <div class="metric-mini-card">
-                                <div class="metric-block-icon lightblue-bg"></div>
+                                <div class="metric-block-icon moving-bg">
+                                    <i class="fas fa-truck-ramp-box"></i>
+                                </div>
                                 <div class="metric-data-info">
-                                    <span class="lbl">Lorem Ipsum</span>
-                                    <h3>21 <span class="trend-pct">+3%</span></h3>
+                                    <span class="lbl">Lipat-Bahay</span>
+                                    <h3 id="metricLipatBahay">0</h3>
                                 </div>
                             </div>
+
                             <div class="metric-mini-card">
-                                <div class="metric-block-icon blue-bg"></div>
+                                <div class="metric-block-icon parcel-bg">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
                                 <div class="metric-data-info">
-                                    <span class="lbl">Lorem Ipsum</span>
-                                    <h3>21 <span class="trend-pct">+3%</span></h3>
+                                    <span class="lbl">Standard Parcel</span>
+                                    <h3 id="metricStandardParcel">0</h3>
                                 </div>
                             </div>
+
                             <div class="metric-mini-card">
-                                <div class="metric-block-icon lightblue-bg"></div>
+                                <div class="metric-block-icon cargo-bg">
+                                    <i class="fas fa-dolly"></i>
+                                </div>
                                 <div class="metric-data-info">
-                                    <span class="lbl">Lorem Ipsum</span>
-                                    <h3>21 <span class="trend-pct">+3%</span></h3>
+                                    <span class="lbl">Heavy Cargo</span>
+                                    <h3 id="metricHeavyCargo">0</h3>
                                 </div>
                             </div>
                         </div>
@@ -98,112 +109,48 @@
 
                     <section class="data-block-section">
                         <div class="section-header-row">
-                            <h3>Active Shipments</h3>
-                            <a href="#" class="view-all-link">View all &gt;</a>
+                            <h3>Active Shipments Tracker</h3>
                         </div>
-
-                        <div class="shipment-progress-card">
-                            <div class="shipment-meta-icon">
-                                <div class="meta-box blue-bg"></div>
-                                <div class="meta-labels">
-                                    <h4>BAC-03252026-1</h4>
-                                    <span>Manila, NCR</span>
-                                </div>
-                            </div>
-                            <div class="progress-track-wrapper">
-                                <div class="progress-bar-container">
-                                    <div class="progress-fill-line" style="width: 65%;"></div>
-                                </div>
-                                <span class="progress-pct-lbl">65%</span>
-                            </div>
-                            <span class="badge status-transit">In Transit</span>
-                        </div>
-
-                        <div class="shipment-progress-card">
-                            <div class="shipment-meta-icon">
-                                <div class="meta-box blue-bg"></div>
-                                <div class="meta-labels">
-                                    <h4>BAC-03252026-4</h4>
-                                    <span>Manila, NCR</span>
-                                </div>
-                            </div>
-                            <div class="progress-track-wrapper">
-                                <div class="progress-bar-container">
-                                    <div class="progress-fill-line" style="width: 65%;"></div>
-                                </div>
-                                <span class="progress-pct-lbl">65%</span>
-                            </div>
-                            <span class="badge status-delivery">Out for Delivery</span>
-                        </div>
+                        <div id="activeShipmentsProgressContainer"></div>
                     </section>
 
                     <section class="data-block-section">
                         <div class="section-header-row">
-                            <h3>Recent Bookings</h3>
-                            <a href="#" class="view-all-link">View all &gt;</a>
+                            <h3>Recent Bookings Ledger</h3>
                         </div>
                         <div class="table-scroll-container">
                             <table class="bookings-data-table">
                                <thead>
-                                   <tr>
-                                       <th>In Transit</th>
-                                       <th>In Transit</th>
-                                       <th>In Transit</th>
-                                       <th>In Transit</th>
-                                       <th>In Transit</th>
-                                   </tr>
+                                    <tr>
+                                        <th>Tracking ID</th>
+                                        <th>Service Type</th>
+                                        <th>Destination</th>
+                                        <th>Date Booked</th>
+                                        <th>Status</th>
+                                    </tr>
                                </thead>
-                               <tbody>
-                                   <tr>
-                                       <td><strong>BAC-03252026-1</strong></td>
-                                       <td>Standard</td>
-                                       <td>Manila, NCR</td>
-                                       <td>18 April 2026</td>
-                                       <td><span class="badge status-transit">In Transit</span></td>
-                                   </tr>
-                                   <tr>
-                                       <td><strong>BAC-03252026-4</strong></td>
-                                       <td>Standard</td>
-                                       <td>Manila, NCR</td>
-                                       <td>18 April 2026</td>
-                                       <td><span class="badge status-delivery">Out for Delivery</span></td>
-                                   </tr>
-                                   <tr>
-                                       <td><strong>BAC-03252026-5</strong></td>
-                                       <td>Standard</td>
-                                       <td>Manila, NCR</td>
-                                       <td>18 April 2026</td>
-                                       <td><span class="badge status-delivered">Delivered</span></td>
-                                   </tr>
-                               </tbody>
+                               <tbody id="bookingsTableBody">
+                                    </tbody>
                             </table>
                         </div>
                     </section>
                 </div>
 
                 <div class="secondary-column">
-                    
                     <section class="sidebar-card-box">
                         <h3>Quick Track</h3>
                         <form id="quickTrackForm" class="quick-track-form">
-                            <input type="text" placeholder="Enter the tracking number" required>
+                            <input type="text" id="quickTrackInput" placeholder="Enter tracking control number" required>
                             <button type="submit" class="btn-track-action">TRACK</button>
                         </form>
                     </section>
 
                     <section class="sidebar-card-box announcements-card">
                         <h3>Announcements</h3>
-                        
                         <div class="announcement-item-node">
-                            <h4>Holiday Schedule Update</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et</p>
-                            <span class="announcement-timestamp">18 April 2026</span>
-                        </div>
-
-                        <div class="announcement-item-node">
-                            <h4>Holiday Schedule Update</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et</p>
-                            <span class="announcement-timestamp">18 April 2026</span>
+                            <h4>Bacoor Hub Operational Notice</h4>
+                            <p>Standard parcel pick-ups and Lipat-Bahay regional routes remain unhampered.</p>
+                            <span class="announcement-timestamp">Current Status</span>
                         </div>
                     </section>
                 </div>
