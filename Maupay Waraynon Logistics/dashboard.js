@@ -1,238 +1,463 @@
+// ==========================================================================
+// 📦 MAUPAY WARAYNON PADALA CENTER - USER DASHBOARD CONTROLLER
+// ==========================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBVUVvHJfsZGvaZmOq2Sz23kI8dnml4dI0",
+    authDomain: "mpc-bacoor.firebaseapp.com",
+    databaseURL: "https://mpc-bacoor-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "mpc-bacoor",
+    storageBucket: "mpc-bacoor.firebasestorage.app",
+    messagingSenderId: "105917197007",
+    appId: "1:105917197007:web:ec34d45a969be00a30e5ba",
+    measurementId: "G-GSF6CFML1Y"
+};
+
+// INITIALIZE CORE ENGINES
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app); 
+const auth = getAuth(app);
+
+// GLOBAL DATA ARRAY
+let shipments = [];
+
+// DOM ELEMENT REGISTRY HOOKS
+const activeShipmentsProgressContainer = document.getElementById("activeShipmentsProgressContainer");
+const bookingsTableBody = document.getElementById("bookingsTableBody");
+const welcomeSummaryLabel = document.getElementById("welcomeSummaryLabel");
+const liveDashboardDate = document.getElementById("liveDashboardDate");
+const profileAvatar = document.getElementById("profileAvatar");
+const welcomeGreeting = document.getElementById("welcomeGreeting"); 
+
+// NUMERIC METRIC COUNTER NODES
+const metricTotalBookings = document.getElementById("metricTotalBookings");
+const metricLipatBahay = document.getElementById("metricLipatBahay");
+const metricStandardParcel = document.getElementById("metricStandardParcel");
+const metricHeavyCargo = document.getElementById("metricHeavyCargo");
+
+// FORM ACTIONS NAVIGATION HOOK
+const quickTrackForm = document.getElementById("quickTrackForm");
+const quickTrackInput = document.getElementById("quickTrackInput");
+
+// ==========================================================================
+// 🚀 ENGINE INITIALIZATION LOGIC
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-    const metricTotalBookings = document.getElementById("metricTotalBookings");
-    const metricLipatBahay = document.getElementById("metricLipatBahay");
-    const metricStandardParcel = document.getElementById("metricStandardParcel");
-    const metricHeavyCargo = document.getElementById("metricHeavyCargo");
+    initializeDashboardDate();
+    setupEventListeners();
+    listenToLiveShipments();
+});
+
+/**
+ * Sets up live calendar timestamps on the primary banner row
+ */
+function initializeDashboardDate() {
+    if (!liveDashboardDate) return;
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const today = new Date();
+    liveDashboardDate.textContent = today.toLocaleDateString('en-US', options);
+}
+
+/**
+ * 🔌 FIRESTORE REAL-TIME REPOSITORY STREAM LISTENER
+ */
+function listenToLiveShipments() {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userDocRef = doc(db, "Customer", user.uid);
+
+            // onSnapshot actively listens to Firestore updates instantly!
+            onSnapshot(userDocRef, (docSnap) => {
+                shipments = [];
+                
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+
+                    // 1. Sync User Profile Avatar Letter Icon & Name Text Greeting Symmetrically
+                    const firstName = userData.firstName || userData.fullName || "";
+                    if (firstName) {
+                        if (profileAvatar) {
+                            profileAvatar.textContent = firstName.charAt(0).toUpperCase();
+                        }
+                        if (welcomeGreeting) {
+                            const hour = new Date().getHours();
+                            let greetingTime = "Day";
+                            if (hour < 12) greetingTime = "Morning";
+                            else if (hour < 18) greetingTime = "Afternoon";
+                            else greetingTime = "Evening";
+
+                            welcomeGreeting.textContent = `Good ${greetingTime}, ${firstName}`;
+                        }
+                    }
+
+                    // 2. Extract Nested Booking Structures from Firestore Fields
+                    const services = userData.services || {};
+
+                    // Array of your sub-service categories defined in Firestore
+                    const categories = ["standardParcel", "lipatbahay", "cargo"];
+
+                    categories.forEach(categoryName => {
+                        const serviceGroup = services[categoryName];
+                        if (serviceGroup) {
+                            
+                            // Check if the group is directly a single legacy booking object map
+                            if (serviceGroup["1_trackingId"] || serviceGroup.trackingId) {
+                                const trackingId = serviceGroup["1_trackingId"] || serviceGroup.trackingId;
+                                const rxDetails = serviceGroup["3_receiverDetails"] || {};
+                                const pcDetails = serviceGroup["4_parcelDetails"] || {};
+                                
+                                shipments.push({
+                                    id: serviceGroup.idTimestamp || "1",
+                                    trackingId: trackingId,
+                                    serviceType: serviceGroup.serviceWorkflowType || "Standard Parcel",
+                                    destination: pcDetails.dashboardDisplayDestination || rxDetails.city || rxDetails.fullAddress || "Unknown",
+                                    dateBooked: serviceGroup.dateBooked || "Recent",
+                                    status: serviceGroup.status || "Pending Dispatch",
+                                    timestamp: serviceGroup.bookingTimestamp ? new Date(serviceGroup.bookingTimestamp).getTime() : 0
+                                });
+                            } else {
+                                // Loop over dynamic unique stack keys (e.g. booking_1718741250000)
+                                Object.keys(serviceGroup).forEach(key => {
+                                    const item = serviceGroup[key];
+                                    if (item && (item.trackingId || item["1_trackingId"])) {
+                                        const trackingId = item.trackingId || item["1_trackingId"];
+                                        const rxDetails = item.receiverDetails || item["3_receiverDetails"] || {};
+                                        const pcDetails = item.parcelDetails || item["4_parcelDetails"] || {};
+                                        
+                                        shipments.push({
+                                            id: key,
+                                            trackingId: trackingId,
+                                            serviceType: item.serviceWorkflowType || item.serviceType || categoryName,
+                                            destination: pcDetails.dashboardDisplayDestination || rxDetails.city || "Unknown",
+                                            dateBooked: item.dateBooked || "Recent",
+                                            status: item.status || "Pending Dispatch",
+                                            timestamp: item.bookingTimestamp ? new Date(item.bookingTimestamp).getTime() : 0
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+
+                // 🌟 SAFE SORTING: Safeguard against NaN calculations with legacy fallback structures
+                shipments.sort((a, b) => {
+                    const timeA = isNaN(a.timestamp) ? 0 : a.timestamp;
+                    const timeB = isNaN(b.timestamp) ? 0 : b.timestamp;
+                    return timeB - timeA;
+                });
+
+                // Refresh UI views instantly with your clean database data
+                calculateAndRenderMetrics();
+                renderActiveProgressCards();
+                renderLedgerTable();
+            });
+        } else {
+            console.log("No authenticated user active.");
+            const fallbackUid = "oZ55xPFsSYWyVTD5R8G1kYmx43"; 
+            setupStaticListenerFallback(fallbackUid);
+        }
+    });
+}
+
+/**
+ * Fallback static document watcher context configuration helper
+ */
+function setupStaticListenerFallback(uid) {
+    const fallbackRef = doc(db, "Customer", uid);
+    onSnapshot(fallbackRef, (docSnap) => {
+        if (!auth.currentUser && docSnap.exists()) {
+            shipments = [];
+            const userData = docSnap.data();
+            
+            if (profileAvatar && userData.firstName) {
+                profileAvatar.textContent = userData.firstName.charAt(0).toUpperCase();
+            }
+            if (welcomeGreeting && userData.firstName) {
+                welcomeGreeting.textContent = `Good Evening, ${userData.firstName}`;
+            }
+
+            const services = userData.services || {};
+            const categories = ["standardParcel", "lipatbahay", "cargo"];
+
+            categories.forEach(categoryName => {
+                const serviceGroup = services[categoryName];
+                if (serviceGroup) {
+                    if (serviceGroup["1_trackingId"] || serviceGroup.trackingId) {
+                        shipments.push({
+                            id: serviceGroup.idTimestamp || "1",
+                            trackingId: serviceGroup["1_trackingId"] || serviceGroup.trackingId,
+                            serviceType: serviceGroup.serviceWorkflowType || "Standard Parcel",
+                            destination: serviceGroup["4_parcelDetails"]?.dashboardDisplayDestination || serviceGroup["3_receiverDetails"]?.city || "Unknown",
+                            dateBooked: serviceGroup.dateBooked || "Recent",
+                            status: serviceGroup.status || "Pending Dispatch",
+                            timestamp: serviceGroup.bookingTimestamp ? new Date(serviceGroup.bookingTimestamp).getTime() : 0
+                        });
+                    } else {
+                        Object.keys(serviceGroup).forEach(key => {
+                            const item = serviceGroup[key];
+                            if (item && (item.trackingId || item["1_trackingId"])) {
+                                shipments.push({
+                                    id: key,
+                                    trackingId: item.trackingId || item["1_trackingId"],
+                                    serviceType: item.serviceWorkflowType || item.serviceType || categoryName,
+                                    destination: item["4_parcelDetails"]?.dashboardDisplayDestination || item["3_receiverDetails"]?.city || "Unknown",
+                                    dateBooked: item.dateBooked || "Recent",
+                                    status: item.status || "Pending Dispatch",
+                                    timestamp: item.bookingTimestamp ? new Date(item.bookingTimestamp).getTime() : 0
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            shipments.sort((a, b) => {
+                const timeA = isNaN(a.timestamp) ? 0 : a.timestamp;
+                const timeB = isNaN(b.timestamp) ? 0 : b.timestamp;
+                return timeB - timeA;
+            });
+
+            calculateAndRenderMetrics();
+            renderActiveProgressCards();
+            renderLedgerTable();
+        }
+    });
+}
+
+/**
+ * Evaluates the dataset and updates data metrics counters symmetrically
+ */
+function calculateAndRenderMetrics() {
+    const totalCount = shipments.length;
+    const activeCount = shipments.filter(s => (s.status || "").toLowerCase() !== "delivered").length;
+
+    let lipatBahayCount = 0;
+    let standardParcelCount = 0;
+    let heavyCargoCount = 0;
+
+    shipments.forEach(parcel => {
+        const type = (parcel.serviceType || "").toLowerCase();
+        const id = (parcel.trackingId || "");
+        
+        if (type.includes("lipat") || id.startsWith("LBH-")) {
+            lipatBahayCount++;
+        } else if (type.includes("heavy") || type.includes("cargo") || id.startsWith("CRG-")) {
+            heavyCargoCount++;
+        } else {
+            standardParcelCount++;
+        }
+    });
+
+    if (metricTotalBookings) metricTotalBookings.textContent = totalCount;
+    if (metricLipatBahay) metricLipatBahay.textContent = lipatBahayCount;
+    if (metricStandardParcel) metricStandardParcel.textContent = standardParcelCount;
+    if (metricHeavyCargo) metricHeavyCargo.textContent = heavyCargoCount;
+
+    if (welcomeSummaryLabel) {
+        welcomeSummaryLabel.textContent = `You have ${activeCount} active shipment${activeCount === 1 ? '' : 's'} recorded.`;
+    }
+}
+
+/**
+ * 📇 GENERATES THE ACTIVE TRACKER CARD LAYOUT (Using Clean CSS Classes)
+ */
+function renderActiveProgressCards() {
+    if (!activeShipmentsProgressContainer) return;
+    activeShipmentsProgressContainer.innerHTML = ""; 
     
-    const activeShipmentsProgressContainer = document.getElementById("activeShipmentsProgressContainer");
-    const bookingsTableBody = document.getElementById("bookingsTableBody");
-    const welcomeSummaryLabel = document.getElementById("welcomeSummaryLabel");
-    const quickTrackForm = document.getElementById("quickTrackForm");
+    const activeShipments = shipments.filter(s => (s.status || "").toLowerCase() !== "delivered");
 
-    // Fetch data from localStorage or fallback to an empty array
-    const shipments = JSON.parse(localStorage.getItem("maupayShipments")) || [];
-
-    // Helper Utility: Forces raw text fragments cleanly into standardized Title Case
-    function formatToTitleCase(str) {
-        if (!str) return "Authorized Receiver";
-        return str.toLowerCase().split(' ').map(word => {
-            // Keep specific organizational acronyms capitalized if found
-            if (["ncr", "ph"].includes(word)) return word.toUpperCase();
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        }).join(' ');
+    if (activeShipments.length === 0) {
+        activeShipmentsProgressContainer.innerHTML = `
+            <div style="padding: 24px; text-align: center; color: #94a3b8; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; width: 100%;">
+                <p style="margin: 0; font-size: 0.9rem;">No active transit routes discovered.</p>
+            </div>`;
+        return;
     }
 
-    // Helper Utility: Selects the most appropriate professional Font Awesome icon based on booking category
-    function getServiceIcon(serviceType) {
-        const type = (serviceType || "").toLowerCase();
-        if (type.includes("lipat") || type.includes("bahay") || type.includes("moving")) {
-            return "fas fa-truck-ramp-box"; // Best for Home Moving / Lipat Bahay
-        } else if (type.includes("heavy") || type.includes("cargo") || type.includes("commercial")) {
-            return "fas fa-dolly";           // Best for Industrial Heavy Cargo
+    activeShipments.forEach(parcel => {
+        const service = (parcel.serviceType || "").toLowerCase();
+        const trackingId = parcel.trackingId || "Awaiting ID...";
+        const destinationText = parcel.destination || "Unknown Destination";
+        
+        let iconClass = "fas fa-box-open";
+        let iconColorModifier = "icon-green"; 
+        
+        if (service.includes("lipat") || trackingId.startsWith("LBH-")) {
+            iconClass = "fas fa-truck-ramp-box";
+            iconColorModifier = "icon-purple";
+        } else if (service.includes("heavy") || service.includes("cargo") || trackingId.startsWith("CRG-")) {
+            iconClass = "fas fa-dolly";
+            iconColorModifier = "icon-orange";
         } else {
-            return "fas fa-box-open";       // Best for Standard Mail & Small Parcels
+            iconClass = "fas fa-box-open";
+            iconColorModifier = "icon-blue";
         }
-    }
 
-    // Normalizes mixed destination parameters cleanly into a premium formal "Name — Location" layout
-    function parseDestinationString(rawDestination) {
-        if (!rawDestination) return "Authorized Receiver — Tacloban City";
+        const statusRaw = parcel.status || "Pending Dispatch";
+        const statusClean = statusRaw.toLowerCase();
+        const statusClassModifier = statusClean.includes("pending") ? "status-pending" : "status-transit";
         
-        // Strip out the sloppy legacy fallback string text cleanly if found
-        let cleanText = rawDestination.replace(/\s*-\s*Main Delivery Zone/gi, "");
-        cleanText = cleanText.replace(/\s*—\s*Main Delivery Zone/gi, "");
-        
-        let namePart = "Authorized Receiver";
-        let locationPart = "";
-
-        // Detect structural delimiters
-        if (cleanText.includes(" — ")) {
-            const parts = cleanText.split(" — ");
-            namePart = parts[0].trim();
-            locationPart = parts[1].trim();
-        } else if (cleanText.includes(" - ")) {
-            const parts = cleanText.split(" - ");
-            namePart = parts[0].trim();
-            locationPart = parts[1].trim();
-        } else {
-            // Implicit fallback detection for pure address records
-            const lowerText = cleanText.toLowerCase();
-            if (lowerText.includes("tacloban") || lowerText.includes("manila") || lowerText.includes("pasay") || lowerText.includes("piñas") || lowerText.includes("san juan") || lowerText.includes("apayao")) {
-                locationPart = cleanText;
-            } else {
-                namePart = cleanText;
-                locationPart = "Main Terminal";
-            }
-        }
-
-        // Apply title casing properties cleanly to strings
-        const formattedName = formatToTitleCase(namePart);
-        const formattedLocation = formatToTitleCase(locationPart);
-
-        return locationPart ? `${formattedName} — ${formattedLocation}` : formattedName;
-    }
-
-    // Function to calculate and update dashboard metrics counters
-    function calculateMetrics() {
-        const total = shipments.length;
-
-        // FLEXIBLE MATCHING: Converts to lowercase and checks keywords to bypass spelling/mismatches
-        const lipatBahayCount = shipments.filter(s => {
-            const type = (s.serviceType || "").toLowerCase();
-            return type.includes("lipat") || type.includes("bahay");
-        }).length;
-
-        const standardCount = shipments.filter(s => {
-            const type = (s.serviceType || "").toLowerCase();
-            return type.includes("standard") || type.includes("parcel");
-        }).length;
-
-        const cargoCount = shipments.filter(s => {
-            const type = (s.serviceType || "").toLowerCase();
-            return type.includes("heavy") || type.includes("cargo") || type.includes("commercial");
-        }).length;
-
-        // Counter UI Assignment safely checking if elements exist first
-        if (metricTotalBookings) metricTotalBookings.textContent = total;
-        if (metricLipatBahay) metricLipatBahay.textContent = lipatBahayCount;
-        if (metricStandardParcel) metricStandardParcel.textContent = standardCount;
-        if (metricHeavyCargo) metricHeavyCargo.textContent = cargoCount;
-
-        // Dynamic Sub-Header string change
-        const activeCount = shipments.filter(s => s.status !== "Delivered").length;
-        if (welcomeSummaryLabel) {
-            welcomeSummaryLabel.textContent = `You have ${activeCount} active operational shipments recorded.`;
-        }
-    }
-
-    // Function to build and show the active transit progress bar components
-    function renderActiveProgressCards() {
-        if (!activeShipmentsProgressContainer) return;
-        
-        activeShipmentsProgressContainer.innerHTML = ""; 
-
-        // Filter out items that are already closed or delivered
-        const activeShipments = shipments.filter(s => s.status !== "Delivered");
-
-        if (activeShipments.length === 0) {
-            activeShipmentsProgressContainer.innerHTML = `
-                <div class="no-data-placeholder" style="padding: 32px; text-align: center; color: #94a3b8; background: #fff; border: 2px dashed #e2e8f0; border-radius: 12px;">
-                    <i class="fas fa-folder-open" style="font-size: 28px; margin-bottom: 8px; color: #cbd5e1;"></i>
-                    <p style="margin: 0; font-size: 0.9rem;">No active transit routes discovered. Create a new booking to populate real-time milestones.</p>
-                </div>`;
-            return;
-        }
-
-        // Arranged from latest on top to oldest
-        const sortedActiveShipments = [...activeShipments].reverse();
-
-        // Generate progress bars dynamically based on transit states
-        sortedActiveShipments.forEach(shipment => {
-            let progressPercentage = 35; 
-            let statusClass = "status-transit";
-            
-            if (shipment.status === "Out for Delivery") {
-                progressPercentage = 85;
-                statusClass = "status-delivery";
-            } else if (shipment.status === "Pending Dispatch") {
-                progressPercentage = 15;
-                statusClass = "status-pending";
-            }
-
-            const cleanDestination = parseDestinationString(shipment.destination);
-            
-            // Dynamic Icon assignment based on category matching
-            const dynamicIconClass = getServiceIcon(shipment.serviceType);
-
-            // 🏛️ PREMIUM GRID ALIGNMENT STRUCTURAL INJECTION
-            const cardHtml = `
-                <div class="shipment-progress-card">
-                    <div class="shipment-info-col">
-                        <div class="meta-box-avatar">
-                            <i class="${dynamicIconClass}"></i>
-                        </div>
-                        <div class="meta-text-details">
-                            <h4>${shipment.trackingId}</h4>
-                            <p>To: ${cleanDestination}</p>
-                        </div>
+        const cardMarkup = `
+            <div class="active-shipment-card">
+                <div class="card-left-group">
+                    <div class="card-icon-wrapper ${iconColorModifier}">
+                        <i class="${iconClass}" style="font-size: 1.2rem;"></i>
                     </div>
-                    
-                    <div class="shipment-progress-col">
-                        <div class="progress-bar-container">
-                            <div class="progress-fill-line" style="width: ${progressPercentage}%;"></div>
-                        </div>
-                        <span class="progress-pct-lbl">${progressPercentage}%</span>
-                    </div>
-                    
-                    <div class="shipment-status-col">
-                        <span class="badge ${statusClass}">${shipment.status}</span>
+                    <div class="card-details">
+                        <span class="tracking-id">${trackingId}</span>
+                        <span class="destination-text">To: ${destinationText}</span>
                     </div>
                 </div>
-            `;
-            activeShipmentsProgressContainer.insertAdjacentHTML("beforeend", cardHtml);
-        });
+                <div class="card-progress-wrapper">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 15%;"></div>
+                    </div>
+                    <span class="progress-percentage">15%</span>
+                </div>
+                <div>
+                    <span class="status-btn-pill ${statusClassModifier}">
+                        ${statusRaw}
+                    </span>
+                </div>
+            </div>
+        `;
+        activeShipmentsProgressContainer.insertAdjacentHTML("beforeend", cardMarkup);
+    });
+}
+
+/**
+ * 📊 GENERATES RECENT BOOKINGS LEDROW LAYOUT
+ */
+function renderLedgerTable() {
+    if (!bookingsTableBody) return;
+    bookingsTableBody.innerHTML = "";
+
+    if (shipments.length === 0) {
+        bookingsTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No shipments booked yet.</td></tr>`;
+        return;
     }
 
-    // Function to render the history ledger data table rows
-    function renderLedgerTable() {
-        if (!bookingsTableBody) return;
+    shipments.forEach(parcel => {
+        const trackingId = parcel.trackingId || "Awaiting ID...";
+        const serviceText = parcel.serviceType || "Standard Parcel";
+        const destinationText = parcel.destination || "Unknown Destination";
+        const dateText = parcel.dateBooked || "Recent";
+        const statusRaw = parcel.status || "Pending Dispatch";
         
-        bookingsTableBody.innerHTML = "";
+        const statusClean = statusRaw.toLowerCase();
+        const statusClassModifier = statusClean.includes("pending") ? "status-pending" : "status-transit";
 
-        if (shipments.length === 0) {
-            bookingsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">
-                        No shipments booked yet. Click "Book a Shipment" to begin.
-                    </td>
-                </tr>`;
-            return;
-        }
+        const rowElementMarkup = `
+            <tr>
+                <td style="font-weight: 700; color: #0c2340;">${trackingId}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-box" style="color: #64748b; font-size: 0.9rem;"></i>
+                        <span>${serviceText}</span>
+                    </div>
+                </td>
+                <td style="max-width: 250px; line-height: 1.4; word-break: break-word;">${destinationText}</td>
+                <td style="white-space: nowrap;">${dateText}</td>
+                <td>
+                    <span class="status-btn-pill ${statusClassModifier}" style="padding: 6px 14px; min-width: 120px; font-size: 0.78rem;">
+                        ${statusRaw}
+                    </span>
+                </td>
+            </tr>
+        `;
+        bookingsTableBody.insertAdjacentHTML("beforeend", rowElementMarkup);
+    });
+}
 
-        // Sort ledger to show newest bookings first
-        const sortedShipments = [...shipments].reverse();
-
-        sortedShipments.forEach(shipment => {
-            let statusBadgeClass = "status-transit";
-            if (shipment.status === "Out for Delivery") statusBadgeClass = "status-delivery";
-            if (shipment.status === "Delivered") statusBadgeClass = "status-delivered";
-            if (shipment.status === "Pending Dispatch") statusBadgeClass = "status-pending";
-
-            const cleanDestination = parseDestinationString(shipment.destination);
-            
-            // Select the icon for the ledger table row item
-            const tableRowIcon = getServiceIcon(shipment.serviceType);
-
-            const rowHtml = `
-                <tr>
-                    <td><strong>${shipment.trackingId}</strong></td>
-                    <td><i class="${tableRowIcon}" style="margin-right: 6px; color: #64748b; width: 16px; text-align: center;"></i> ${shipment.serviceType}</td>
-                    <td>${cleanDestination}</td>
-                    <td>${shipment.dateBooked || "Today"}</td>
-                    <td><span class="badge ${statusBadgeClass}">${shipment.status}</span></td>
-                </tr>
-            `;
-            bookingsTableBody.insertAdjacentHTML("beforeend", rowHtml);
-        });
-    }
-
-    // Fast-redirect function passing text control numbers over to the track parcel screen
+/**
+ * Installs event listeners for utility controls like Search/Quick tracking
+ */
+function setupEventListeners() {
     if (quickTrackForm) {
         quickTrackForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            const quickTrackInput = document.getElementById("quickTrackInput");
-            if (quickTrackInput) {
-                const trackNum = quickTrackInput.value.trim();
-                if (trackNum) {
-                    sessionStorage.setItem("pendingTrackId", trackNum);
-                    window.location.href = "track-parcel.html";
-                }
+            const controlNumber = quickTrackInput.value.trim();
+            if (controlNumber) {
+                alert(`Searching tracking matrix repository for: ${controlNumber}`);
             }
         });
     }
 
-    // Initialize operations panel engine calculations on layout loading
-    calculateMetrics();
-    renderActiveProgressCards();
-    renderLedgerTable();
-});
+    // Connect form listener for modal/popup elements present on this page template
+    const bookingForm = document.getElementById("bookingForm");
+    if (bookingForm) {
+        bookingForm.addEventListener("submit", handleBookingSubmission);
+    }
+}
+
+// ==========================================================================
+// ➕ APPEND NEW STACKABLE BOOKING DATA ENGINE METHOD
+// ==========================================================================
+async function handleBookingSubmission(e) {
+    e.preventDefault();
+
+    const user = auth.currentUser;
+    if (!user) {
+        alert("You must be logged in to create a booking.");
+        return;
+    }
+
+    const serviceTypeInput = document.getElementById("serviceType");
+    const receiverCityInput = document.getElementById("receiverCity");
+    const displayDestinationInput = document.getElementById("displayDestination");
+
+    const serviceCategory = serviceTypeInput ? serviceTypeInput.value : "standardParcel";
+    const receiverCity = receiverCityInput ? receiverCityInput.value.trim() : "Unknown City";
+    const displayDestination = displayDestinationInput ? displayDestinationInput.value.trim() : "Unknown Destination";
+
+    let trackingPrefix = "MPC";
+    let formattedServiceType = "Standard Parcel";
+    
+    if (serviceCategory === "lipatbahay") {
+        trackingPrefix = "LBH";
+        formattedServiceType = "Lipat-Bahay";
+    }
+    if (serviceCategory === "cargo") {
+        trackingPrefix = "CRG";
+        formattedServiceType = "Heavy Cargo";
+    }
+
+    const generatedTrackingId = `${trackingPrefix}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const currentTimestamp = Date.now();
+    const uniqueBookingKey = `booking_${currentTimestamp}`;
+
+    // Fixes overwrite bug by using dynamic nested paths: services.categoryName.booking_timestamp
+    const bookingPayload = {
+        [`services.${serviceCategory}.${uniqueBookingKey}`]: {
+            "1_trackingId": generatedTrackingId,
+            "idTimestamp": uniqueBookingKey,
+            "serviceWorkflowType": formattedServiceType,
+            "status": "Pending Dispatch",
+            "bookingTimestamp": new Date().toISOString(),
+            "dateBooked": new Date().toLocaleDateString('en-US'),
+            "3_receiverDetails": { "city": receiverCity },
+            "4_parcelDetails": { "dashboardDisplayDestination": displayDestination }
+        }
+    };
+
+    try {
+        // Updated path from 10.0.0 mismatch to stay unified with global architecture hooks
+        const { updateDoc } = await import("https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js");
+        const userDocRef = doc(db, "Customer", user.uid);
+
+        await updateDoc(userDocRef, bookingPayload);
+        alert(`Booking success! Your tracking ID is: ${generatedTrackingId}`);
+        
+        const bookingForm = document.getElementById("bookingForm");
+        if (bookingForm) bookingForm.reset();
+    } catch (error) {
+        console.error("Error writing stacked transactional maps to Firestore instance:", error);
+        alert("Failed to save booking. Please check database read/write permissions rules.");
+    }
+}
